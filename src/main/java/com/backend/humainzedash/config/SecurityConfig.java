@@ -1,5 +1,6 @@
 package com.backend.humainzedash.config;
 
+import com.backend.humainzedash.security.ApiKeyAuthenticationFilter;
 import com.backend.humainzedash.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -26,11 +28,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/actuator/**", "/docs/**", "/api-docs/**").permitAll()
+                        .requestMatchers("/auth/login", "/auth/token", "/actuator/**", "/docs/**", "/api-docs/**").permitAll()
                         .requestMatchers("/otel/v1/**").hasAnyRole("IA", "IOT", "JAVA")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/alerts/**").hasAnyRole("IA", "ADMIN")
-                        .anyRequest().authenticated())
+                        .anyRequest().denyAll())
+                .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
