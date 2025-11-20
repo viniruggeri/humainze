@@ -1,0 +1,57 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: humainze-dash
+    profile: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+    open-in-view: false
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+jwt:
+  issuer: humainze-dash
+  audience: humainze-clients
+  secret: ${JWT_SECRET:my-super-secure-jwt-secret-key-with-at-least-256-bits-for-hs256-algorithm}
+  expiration-minutes: 120
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://signoz:4317}
+  export:
+    enabled: true
+telemetry:
+  teamTag: humainze
+ia:
+  health:
+    url: http://ia-service:8000/health
+    interval-ms: 300000
+seed:
+  admin-secret: ${SEED_ADMIN_SECRET:admin-secret}
+  ia-secret: ${SEED_IA_SECRET:ia-secret}
+  iot-secret: ${SEED_IOT_SECRET:iot-secret}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
+  endpoint:
+    health:
+      show-details: always
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    com.backend.humainzedash: DEBUG
+springdoc:
+  swagger-ui:
+    path: /docs
+  api-docs:
+    path: /api-docs

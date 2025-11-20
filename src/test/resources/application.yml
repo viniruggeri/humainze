@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:humainze;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  mail:
+    host: localhost
+    port: 2525
+jwt:
+  issuer: test-issuer
+  audience: test-audience
+  secret: test-secret-test-secret-test-secret-long-enough-for-hs256
+  expiration-minutes: 120
+seed:
+  enabled: false
+ia:
+  health:
+    url: http://localhost:8000/health
+    interval-ms: 600000
+

@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  humainze-dash:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/xe
+      SPRING_DATASOURCE_USERNAME: humainze
+      SPRING_DATASOURCE_PASSWORD: humainze
+      JWT_SECRET: change-me
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz:4317
+    depends_on:
+      - oracle
+      - signoz
+  oracle:
+    image: gvenzl/oracle-xe:21-slim
+    environment:
+      ORACLE_PASSWORD: humainze
+    ports:
+      - "1521:1521"
+  signoz:
+    image: signoz/signoz:latest
+    ports:
+      - "4318:4318"
+      - "4317:4317"
+

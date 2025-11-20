@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@oracle-remote:1521/xe}
+    username: ${SPRING_DATASOURCE_USERNAME:humainze}
+    password: ${SPRING_DATASOURCE_PASSWORD:humainze}
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+seed:
+  enabled: true
+jwt:
+  secret: ${JWT_SECRET}
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://signoz:4317}
+  export:
+    enabled: true
+logging:
+  level:
+    root: INFO
+
