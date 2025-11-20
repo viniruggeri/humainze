@@ -1,0 +1,173 @@
+### ===================================
+### ADMIN - Gestão de Times e Sistema
+### ===================================
+### INSTRUÇÕES:
+### 1. Execute o LOGIN primeiro
+### 2. Copie o token da resposta
+### 3. Cole no arquivo http-client.env.json no campo "adminToken"
+### 4. Execute as outras requisições
+### ===================================
+
+@baseUrl = {{baseUrl}}
+@token = {{adminToken}}
+
+###############################################
+### 1. AUTENTICAÇÃO
+###############################################
+
+### Login como ADMIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "team": "ADMIN",
+  "secret": "admin-secret"
+}
+
+###
+
+### Verificar meu perfil
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###############################################
+### 2. GESTÃO DE TIMES
+###############################################
+
+### Listar todos os times
+GET {{baseUrl}}/teams
+Authorization: Bearer {{token}}
+
+###
+
+### Buscar time específico (ID 1)
+GET {{baseUrl}}/teams/1
+Authorization: Bearer {{token}}
+
+###
+
+### Criar novo time (JAVA)
+POST {{baseUrl}}/teams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tag": "JAVA",
+  "secret": "java-secret-super-strong-123",
+  "description": "Time de desenvolvimento Java",
+  "emails": ["java@humanize.ai", "dev@humanize.ai"]
+}
+
+###
+
+### Atualizar time
+PATCH {{baseUrl}}/teams/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Time administrativo atualizado"
+}
+
+###
+
+### Deletar time (cuidado!)
+# DELETE {{baseUrl}}/teams/4
+# Authorization: Bearer {{token}}
+
+###############################################
+### 3. GESTÃO DE ROLES
+###############################################
+
+### Adicionar role ao time
+POST {{baseUrl}}/teams/1/roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "roleName": "ROLE_JAVA"
+}
+
+###
+
+### Remover role do time
+# DELETE {{baseUrl}}/teams/1/roles/2
+# Authorization: Bearer {{token}}
+
+###############################################
+### 4. MONITORAMENTO (ADMIN vê tudo)
+###############################################
+
+### Todas as métricas (todas as equipes)
+GET {{baseUrl}}/export/metrics?page=0&size=20
+Authorization: Bearer {{token}}
+
+###
+
+### Métricas filtradas por equipe (IA)
+GET {{baseUrl}}/export/metrics?teamTag=IA&page=0&size=10
+Authorization: Bearer {{token}}
+
+###
+
+### Métricas filtradas por equipe (IOT)
+GET {{baseUrl}}/export/metrics?teamTag=IOT&page=0&size=10
+Authorization: Bearer {{token}}
+
+###
+
+### Todos os traces
+GET {{baseUrl}}/export/traces?page=0&size=20
+Authorization: Bearer {{token}}
+
+###
+
+### Todos os logs
+GET {{baseUrl}}/export/logs?page=0&size=20
+Authorization: Bearer {{token}}
+
+###
+
+### Todos os alertas (todas as equipes)
+GET {{baseUrl}}/alerts?page=0&size=20
+Authorization: Bearer {{token}}
+
+###############################################
+### 5. HEALTH CHECKS
+###############################################
+
+### Health check da aplicação
+GET {{baseUrl}}/actuator/health
+
+###
+
+### Informações da aplicação
+GET {{baseUrl}}/actuator/info
+
+###
+
+### Métricas do Actuator
+GET {{baseUrl}}/actuator/metrics
+
+###
+
+### Métricas específicas (ex: JVM memory)
+GET {{baseUrl}}/actuator/metrics/jvm.memory.used
+
+###############################################
+### 6. SWAGGER UI
+###############################################
+
+### Abrir no navegador:
+### http://localhost:8080/swagger-ui.html
+
+###############################################
+### 7. H2 CONSOLE (DEV)
+###############################################
+
+### Abrir no navegador:
+### http://localhost:8080/h2-console
+### JDBC URL: jdbc:h2:mem:humainze-dev
+### User: sa
+### Password: (vazio)
+
