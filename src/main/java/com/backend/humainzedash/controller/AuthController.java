@@ -24,7 +24,7 @@ public class AuthController {
                     JwtPayload payload = new JwtPayload(
                             apiKeyData.teamId(),
                             apiKeyData.teamTag(),
-                            apiKeyData.teamTag(),
+                            apiKeyData.teamTag() + "@humainze.com",
                             apiKeyData.roles()
                     );
                     String token = jwtService.generateToken(payload);

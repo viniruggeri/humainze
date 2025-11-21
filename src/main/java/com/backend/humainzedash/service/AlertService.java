@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -50,7 +51,8 @@ public class AlertService {
         return toResponse(alertRepository.save(alert));
     }
 
-    private void sendEmail(Alert alert) {
+    @Async
+    protected void sendEmail(Alert alert) {
         JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
         if (mailSender == null) {
             return; // e-mail não configurado, apenas ignora o envio

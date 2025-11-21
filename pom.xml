@@ -21,7 +21,7 @@
         <java.version>21</java.version>
         <otel.version>1.45.0</otel.version>
         <jjwt.version>0.12.6</jjwt.version>
-        <springdoc.version>2.5.0</springdoc.version>
+        <springdoc.version>2.7.0</springdoc.version>
         <mapstruct.version>1.6.2</mapstruct.version>
     </properties>
 
@@ -34,8 +34,8 @@
 
         <!-- WebFlux para WebClient do IAHealthService -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
         </dependency>
 
         <!-- Actuator (health, métricas básicas) -->

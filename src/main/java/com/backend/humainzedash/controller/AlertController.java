@@ -4,6 +4,7 @@ import com.backend.humainzedash.dto.alert.AlertRequest;
 import com.backend.humainzedash.dto.alert.AlertResponse;
 import com.backend.humainzedash.service.AlertService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/alerts")
 @RequiredArgsConstructor
 @Tag(name = "Alerts")
+@SecurityRequirement(name = "jwtAuth")
 public class AlertController {
 
     private final AlertService alertService;

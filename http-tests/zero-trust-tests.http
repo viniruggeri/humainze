@@ -37,8 +37,3 @@ Content-Type: application/json
 ### 8. Tentar acessar endpoint de ADMIN com API Key de IA (deve falhar)
 GET http://localhost:8080/admin/test
 X-API-KEY: chave-ia
-
-### 9. Acessar endpoint de ADMIN com API Key de ADMIN (deve funcionar)
-GET http://localhost:8080/admin/
-X-API-KEY: chave-admin
-

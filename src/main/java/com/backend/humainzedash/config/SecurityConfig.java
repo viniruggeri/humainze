@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
@@ -28,13 +27,29 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/token", "/actuator/**", "/docs/**", "/api-docs/**").permitAll()
+                        .requestMatchers(
+                                "/auth/login",
+                                "/auth/token",
+                                "/actuator/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/docs/**"
+                        ).permitAll()
+
+                        // Observabilidade
                         .requestMatchers("/otel/v1/**").hasAnyRole("IA", "IOT", "JAVA")
+                        // Administrativo
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Alertas
                         .requestMatchers("/alerts/**").hasAnyRole("IA", "ADMIN")
-                        .anyRequest().denyAll())
+                        // Zero Trust
+                        .anyRequest().denyAll()
+                )
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(jwtAuthenticationFilter, ApiKeyAuthenticationFilter.class);
+
         return http.build();
     }
 

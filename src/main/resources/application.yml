@@ -1,9 +1,10 @@
 server:
   port: 8080
 spring:
+  active:
+    profiles: dev
   application:
     name: humainze-dash
-    profile: ${SPRING_PROFILES_ACTIVE:dev}
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,7 +25,7 @@ jwt:
 otel:
   exporter:
     otlp:
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://signoz:4317}
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
   export:
     enabled: true
 telemetry:

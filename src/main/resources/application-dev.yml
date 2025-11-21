@@ -27,7 +27,7 @@ jwt:
 otel:
   exporter:
     otlp:
-      endpoint: http://signoz:4318
+      endpoint: http://localhost:4318
   export:
     enabled: true
 logging:
