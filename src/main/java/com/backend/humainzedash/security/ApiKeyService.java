@@ -1,5 +1,6 @@
 package com.backend.humainzedash.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class ApiKeyService {
 
@@ -20,10 +22,16 @@ public class ApiKeyService {
     }
 
     public Optional<ApiKeyData> validateApiKey(String apiKey) {
-        return Optional.ofNullable(API_KEYS.get(apiKey));
+        log.debug("[ApiKeyService] Validando API Key");
+        Optional<ApiKeyData> result = Optional.ofNullable(API_KEYS.get(apiKey));
+        if (result.isPresent()) {
+            log.info("[ApiKeyService] API Key válida para team: {}", result.get().teamTag());
+        } else {
+            log.warn("[ApiKeyService] API Key inválida");
+        }
+        return result;
     }
 
     public record ApiKeyData(String teamTag, Long teamId, List<String> roles) {
     }
 }
-

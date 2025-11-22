@@ -1,9 +1,10 @@
 package com.backend.humainzedash.config;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
-import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
@@ -24,30 +25,36 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TelemetryConfig {
 
-    @Value("${otel.exporter.otlp.endpoint:http://signoz:4317}")
+    @Value("${otel.exporter.otlp.endpoint:http://localhost:4318}")
     private String otlpEndpoint;
 
     @Bean
     public SpanExporter spanExporter() {
-        return OtlpGrpcSpanExporter.builder().setEndpoint(otlpEndpoint).build();
+        return OtlpHttpSpanExporter.builder()
+                .setEndpoint(otlpEndpoint + "/v1/traces")
+                .build();
     }
 
     @Bean
     public MetricExporter metricExporter() {
-        return OtlpGrpcMetricExporter.builder().setEndpoint(otlpEndpoint).build();
+        return OtlpHttpMetricExporter.builder()
+                .setEndpoint(otlpEndpoint + "/v1/metrics")
+                .build();
     }
 
     @Bean
     public LogRecordExporter logRecordExporter() {
-        return OtlpGrpcLogRecordExporter.builder().setEndpoint(otlpEndpoint).build();
+        return OtlpHttpLogRecordExporter.builder()
+                .setEndpoint(otlpEndpoint + "/v1/logs")
+                .build();
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "otel.export", name = "enabled", havingValue = "true", matchIfMissing = true)
     public OpenTelemetrySdk openTelemetrySdk(SpanExporter spanExporter,
-                                             MetricExporter metricExporter,
-                                             LogRecordExporter logRecordExporter,
-                                             @Value("${telemetry.teamTag:humanize}") String teamTag) {
+            MetricExporter metricExporter,
+            LogRecordExporter logRecordExporter,
+            @Value("${telemetry.teamTag:humanize}") String teamTag) {
         Resource resource = Resource.builder()
                 .put("service.name", "humainze-dash")
                 .put("team", teamTag)
@@ -76,12 +83,21 @@ public class TelemetryConfig {
     }
 
     /**
-     * Customiza o MeterRegistry já criado pelo Spring Boot (micrometer-registry-otlp)
+     * Customiza o MeterRegistry já criado pelo Spring Boot
+     * (micrometer-registry-otlp)
      * adicionando tags padrão, sem precisar de OpenTelemetryMeterRegistry.
      */
     @Bean
     MeterRegistryCustomizer<MeterRegistry> meterRegistryCustomizer(
             @Value("${telemetry.teamTag:humanize}") String teamTag) {
         return registry -> registry.config().commonTags("service", "humainze-dash", "team", teamTag);
+    }
+
+    /**
+     * Bean Tracer para instrumentação manual de spans
+     */
+    @Bean
+    public Tracer tracer(OpenTelemetrySdk openTelemetrySdk) {
+        return openTelemetrySdk.getTracer("humainze-dash", "1.0.0");
     }
 }

@@ -1,25 +1,61 @@
 # 📡 Guia de Integração - Time de IoT
 
-## 📍 Visão Geral
+## 📏 Visão Geral
 
-Este guia descreve como dispositivos IoT (Arduino, ESP32, Raspberry Pi, etc.) enviam dados para o backend Java Humainze para:
+Este guia descreve como dispositivos IoT (Arduino, ESP32, Raspberry Pi, etc.) enviam dados para o **backend Java Humainze** para:
 
-1. **Autenticar** via API Key
+1. **Autenticar** via JWT (login simples)
 2. **Enviar métricas** de sensores (temperatura, umidade, CO2, etc.)
-3. **Receber comandos** de controle
-4. **Visualizar tudo** no SigNoz em tempo real
+3. **Persistir dados** em banco relacional (OracleDB/H2)
+4. **Visualizar tudo** no **Dashboard Streamlit customizado**
+
+### Por que Backend Java?
+
+✅ **Open-source completo** - sem dependências de SigNoz, Grafana, Datadog  
+✅ **Persistência em banco SQL** - OracleDB (prod) ou H2 (dev)  
+✅ **APIs REST com paginação** - `/export/metrics`, `/export/traces`, `/export/logs`  
+✅ **Dashboard customizável** - Streamlit + Plotly, fácil de modificar  
+✅ **Sistema de alertas integrado** - banner em tempo real + histórico
 
 ---
 
 ## 🔐 Autenticação
 
-### API Key IoT
+### Login e Obtenção de Token JWT
+
+O time IoT tem credenciais pré-cadastradas:
+- **Team:** `IOT`
+- **Secret:** `iot-secret`
+
+**Passo 1: Login**
+
+```http
+POST http://backend:8080/auth/login
+Content-Type: application/json
+
+{
+  "team": "IOT",
+  "secret": "iot-secret"
+}
+```
+
+**Resposta:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "team": "IOT",
+  "roles": ["ROLE_IOT"]
+}
+```
+
+**Passo 2: Usar Token**
+
+Em toda requisição subsequente, adicione o header:
 
 ```
-X-API-KEY: chave-iot
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 ```
-
-**Simples**: apenas coloque o header em toda requisição HTTP.
 
 ### Configurar no Dispositivo
 

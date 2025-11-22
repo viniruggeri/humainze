@@ -1,7 +1,7 @@
 ### Zero Trust - API Key to JWT Flow
 
 ### 1. Obter JWT usando API Key do time IA
-POST http://localhost:8080/auth/token
+POST http://localhost:8081/auth/token
 X-API-KEY: chave-ia
 
 ### 2. Obter JWT usando API Key do time IOT

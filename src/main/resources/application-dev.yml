@@ -17,9 +17,6 @@ spring:
   sql:
     init:
       mode: never
-  mail:
-    host: localhost
-    port: 2525
 seed:
   enabled: true
 jwt:

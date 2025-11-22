@@ -1,56 +1,62 @@
 # 📚 Índice de Documentação - Humainze Backend
 
-Bem-vindo à documentação técnica do Humainze Backend! Este é seu mapa de navegação para integrar IA, IoT e visualizar métricas no SigNoz.
+## 📖 Guias Principais
 
----
+### [📋 Sumário Executivo](EXECUTIVE_SUMMARY.md)
+Visão geral do projeto, objetivos, stack tecnológico e arquitetura.
 
-## 🎯 Comece Por Aqui
+### [🤖 Guia de Integração - IA](INTEGRATION_GUIDE_IA.md)
+Como integrar módulos de IA Python com o backend:
+- Código Python para envio de dados
+- APIs de predição e treinamento
+- Detecção de drift
+- Queries SigNoz
 
-Se você acabou de chegar, comece por um desses documentos:
+### [🔌 Guia de Integração - IoT](INTEGRATION_GUIDE_IOT.md)
+Como conectar sensores e dispositivos IoT:
+- Código Arduino/ESP32/C++
+- Protocolo HTTP
+- Formato de payloads
+- Troubleshooting
 
-- **🤖 Team IA?** → Vá para [INTEGRATION_GUIDE_IA.md](INTEGRATION_GUIDE_IA.md)
-- **📡 Team IoT?** → Vá para [INTEGRATION_GUIDE_IOT.md](INTEGRATION_GUIDE_IOT.md)
-- **🔍 Quer visualizar no SigNoz?** → Vá para [SIGNOZ_VISUALIZATION.md](SIGNOZ_VISUALIZATION.md)
+### [📡 Endpoints OpenTelemetry](OTEL_INGESTION_ENDPOINTS.md)
+Documentação dos endpoints OTLP:
+- `/otel/v1/metrics`
+- `/otel/v1/traces`
+- `/otel/v1/logs`
 
----
+### [📦 Exemplos de Payloads](PAYLOAD_EXAMPLES.md)
+Payloads JSON prontos para usar:
+- Métricas IoT
+- Traces distribuídos
+- Logs estruturados
 
-## 📖 Documentos Disponíveis
+### [📊 Visualização com SigNoz](SIGNOZ_VISUALIZATION.md)
+Como usar SigNoz para observabilidade:
+- Dashboard de métricas
+- Tracing distribuído
+- Queries customizadas
 
-### 1. **INTEGRATION_GUIDE_IA.md**
-**Para o time de IA (Python/FastAPI)**
+### [🚨 Sistema de Alertas](ALERTS_SYSTEM.md)
+Documentação completa do sistema de alertas cognitivos:
+- Tipos de alertas (DRIFT, MODEL_ERROR, SERVICE_DOWN)
+- Dashboard Streamlit em tempo real
+- Banner de notificações
+- Paginação e filtros
+- Auto-refresh com polling
 
-Contém:
-- ✅ Como autenticar com API Key ou JWT
-- ✅ Exemplos de código Python para enviar métricas
-- ✅ Integração com GPT-4 para alertas cognitivos
-- ✅ Como receber métricas do backend
-- ✅ Testes rápidos com cURL
-- ✅ Troubleshooting
+### [🚀 Deploy Azure VM](DEPLOY_AZURE.md)
+Guia completo de deploy em Azure Virtual Machine:
+- Provisionar VM no Azure
+- Instalar Docker e Docker Compose
+- Configurar variáveis de ambiente
+- Deploy com dois containers (Backend + Dashboard)
+- Monitoramento e troubleshooting
 
-**Métricas abordadas:**
-- Model accuracy, loss, precision, recall
-- F1 Score, AUC-ROC
-- Inference latency
-- Model drift detection
-- GPU/CPU usage, memory
-- Training progress
+### [📘 Configurar GitHub Pages](GITHUB_PAGES_SETUP.md)
+Como habilitar e configurar GitHub Pages para esta documentação.
 
----
-
-### 2. **INTEGRATION_GUIDE_IOT.md**
-**Para o time de IoT (Arduino/ESP32/Raspberry Pi)**
-
-Contém:
-- ✅ Como autenticar com API Key
-- ✅ Código completo C++ (Arduino/ESP32)
-- ✅ Código completo Python (Raspberry Pi)
-- ✅ Exemplos de sensores (DHT22, MQ-135, LDR, PIR)
-- ✅ Auto-inicialização com systemd
-- ✅ Padrões de envio de dados
-- ✅ Testes e troubleshooting
-
-**Sensores abordados:**
-- Temperatura (DHT22)
+## 📋 Documentação por Categoria
 - Umidade (DHT22)
 - CO2 (MQ-135)
 - Luminosidade (LDR)

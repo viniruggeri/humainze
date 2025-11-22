@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   active:
     profiles: dev
@@ -32,13 +32,21 @@ telemetry:
   teamTag: humainze
 ia:
   health:
-    url: http://ia-service:8000/health
+    url: http://localhost:8000/health
     interval-ms: 300000
 seed:
   admin-secret: ${SEED_ADMIN_SECRET:admin-secret}
   ia-secret: ${SEED_IA_SECRET:ia-secret}
   iot-secret: ${SEED_IOT_SECRET:iot-secret}
 management:
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:4318/v1/metrics
+        step: 30s  # Aumentado de 10s para 30s
+        connect-timeout: 5s
+        read-timeout: 30s  # Timeout aumentado para 30s
   endpoints:
     web:
       exposure:

@@ -1,0 +1,51 @@
+# GitHub Pages Configuration
+theme: jekyll-theme-cayman
+title: Humainze - Documentação Técnica
+description: Backend central de uma plataforma cognitiva integrada que conecta IoT, IA e Dashboard Web
+show_downloads: true
+google_analytics: 
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Integração IA
+    url: /INTEGRATION_GUIDE_IA
+  - title: Integração IoT
+    url: /INTEGRATION_GUIDE_IOT
+  - title: OpenTelemetry
+    url: /OTEL_INGESTION_ENDPOINTS
+  - title: Payloads
+    url: /PAYLOAD_EXAMPLES
+  - title: Visualização
+    url: /SIGNOZ_VISUALIZATION
+
+# Plugins
+plugins:
+  - jekyll-relative-links
+  - jekyll-seo-tag
+
+# Relative links
+relative_links:
+  enabled: true
+  collections: true
+
+# Markdown
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "default"

@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -12,8 +13,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -25,8 +26,9 @@ public class JwtService {
     }
 
     public String generateToken(JwtPayload payload) {
+        log.debug("[JwtService] Gerando token JWT para team: {}", payload.teamTag());
         Instant now = Instant.now();
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .issuer(jwtProperties.issuer())
                 .audience().add(jwtProperties.audience()).and()
                 .subject(payload.teamTag())
@@ -37,6 +39,8 @@ public class JwtService {
                 .claim("roles", payload.roles())
                 .signWith(key())
                 .compact();
+        log.info("[JwtService] Token JWT gerado para team: {} com roles: {}", payload.teamTag(), payload.roles());
+        return token;
     }
 
     public JwtPayload parseToken(String token) {
@@ -47,7 +51,8 @@ public class JwtService {
                 .getPayload();
         Long teamId = claims.get("teamId", Long.class);
         String teamTag = claims.getSubject();
-        List<String> roles = claims.get("roles", List.class);
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) claims.get("roles");
         return new JwtPayload(teamId, teamTag, teamTag, roles);
     }
 }

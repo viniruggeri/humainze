@@ -5,27 +5,23 @@ import com.backend.humainzedash.dto.alert.AlertRequest;
 import com.backend.humainzedash.dto.alert.AlertResponse;
 import com.backend.humainzedash.exception.ResourceNotFoundException;
 import com.backend.humainzedash.repository.AlertRepository;
-import com.backend.humainzedash.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.ObjectProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlertService {
 
     private final AlertRepository alertRepository;
-    private final TeamRepository teamRepository;
-    private final ObjectProvider<JavaMailSender> mailSenderProvider;
 
     public AlertResponse createAlert(AlertRequest request) {
+        log.warn("[AlertService] Criando alerta cognitivo - Team: {}, Type: {}", request.teamTag(), request.type());
         Alert alert = new Alert();
         alert.setTeamTag(request.teamTag());
         alert.setType(request.type());
@@ -33,7 +29,7 @@ public class AlertService {
         alert.setTimestamp(Instant.now());
         alert.setResolved(false);
         Alert saved = alertRepository.save(alert);
-        sendEmail(saved);
+        log.info("[AlertService] Alerta salvo com ID: {}", saved.getId());
         return toResponse(saved);
     }
 
@@ -44,32 +40,32 @@ public class AlertService {
         return alertRepository.findByTeamTag(teamTag, pageable).map(this::toResponse);
     }
 
+    public long countUnresolvedAlerts(String teamTag) {
+        if (teamTag == null) {
+            return alertRepository.countByResolvedFalse();
+        }
+        return alertRepository.countByTeamTagAndResolvedFalse(teamTag);
+    }
+
+    public Page<AlertResponse> listUnresolvedAlerts(String teamTag, Pageable pageable) {
+        if (teamTag == null) {
+            return alertRepository.findByResolvedFalse(pageable).map(this::toResponse);
+        }
+        return alertRepository.findByTeamTagAndResolvedFalse(teamTag, pageable).map(this::toResponse);
+    }
+
     public AlertResponse resolveAlert(Long id) {
+        log.info("[AlertService] Resolvendo alerta ID: {}", id);
         Alert alert = alertRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Alert not found"));
         alert.setResolved(true);
-        return toResponse(alertRepository.save(alert));
-    }
-
-    @Async
-    protected void sendEmail(Alert alert) {
-        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
-        if (mailSender == null) {
-            return; // e-mail não configurado, apenas ignora o envio
-        }
-        teamRepository.findByTagIgnoreCase(alert.getTeamTag()).ifPresent(team -> {
-            if (team.getEmails() == null || team.getEmails().isEmpty()) {
-                return;
-            }
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(team.getEmails().toArray(String[]::new));
-            message.setSubject("Alert " + alert.getType());
-            message.setText(alert.getMessage());
-            mailSender.send(message);
-        });
+        Alert resolved = alertRepository.save(alert);
+        log.info("[AlertService] Alerta ID: {} marcado como resolvido", id);
+        return toResponse(resolved);
     }
 
     private AlertResponse toResponse(Alert alert) {
-        return new AlertResponse(alert.getId(), alert.getTeamTag(), alert.getType(), alert.getMessage(), alert.getTimestamp(), alert.isResolved());
+        return new AlertResponse(alert.getId(), alert.getTeamTag(), alert.getType(), alert.getMessage(),
+                alert.getTimestamp(), alert.isResolved());
     }
 }

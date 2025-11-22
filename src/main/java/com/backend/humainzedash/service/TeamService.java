@@ -10,11 +10,13 @@ import com.backend.humainzedash.repository.RoleRepository;
 import com.backend.humainzedash.repository.TeamRepository;
 import com.backend.humainzedash.repository.TeamRoleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TeamService {
@@ -25,17 +27,22 @@ public class TeamService {
     private final PasswordEncoder passwordEncoder;
 
     public TeamResponse createTeam(TeamRequest request) {
+        log.info("[TeamService] Criando novo team: {}", request.tag());
         Team team = new Team();
         team.setTag(request.tag());
         team.setSecret(passwordEncoder.encode(request.secret()));
         team.setDescription(request.description());
         team.setEmails(request.emails());
         Team saved = teamRepository.save(team);
+        log.info("[TeamService] Team criado com sucesso - ID: {}", saved.getId());
         return toResponse(saved);
     }
 
     public List<TeamResponse> listTeams() {
-        return teamRepository.findAll().stream().map(this::toResponse).toList();
+        log.debug("[TeamService] Listando todos os teams");
+        List<TeamResponse> teams = teamRepository.findAll().stream().map(this::toResponse).toList();
+        log.info("[TeamService] {} teams encontrados", teams.size());
+        return teams;
     }
 
     public TeamResponse getTeam(Long id) {
@@ -53,7 +60,9 @@ public class TeamService {
     }
 
     public void deleteTeam(Long id) {
+        log.warn("[TeamService] Deletando team ID: {}", id);
         teamRepository.delete(findTeam(id));
+        log.info("[TeamService] Team ID: {} deletado", id);
     }
 
     public void addRole(Long teamId, String roleName) {
@@ -86,4 +95,3 @@ public class TeamService {
         return new TeamResponse(team.getId(), team.getTag(), team.getDescription(), team.getEmails(), roles);
     }
 }
-

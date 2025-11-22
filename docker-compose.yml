@@ -3,25 +3,30 @@ services:
   humainze-dash:
     build: .
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/xe
-      SPRING_DATASOURCE_USERNAME: humainze
-      SPRING_DATASOURCE_PASSWORD: humainze
-      JWT_SECRET: change-me
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz:4317
-    depends_on:
-      - oracle
-      - signoz
-  oracle:
-    image: gvenzl/oracle-xe:21-slim
-    environment:
-      ORACLE_PASSWORD: humainze
-    ports:
-      - "1521:1521"
-  signoz:
-    image: signoz/signoz:latest
-    ports:
-      - "4318:4318"
-      - "4317:4317"
+      # Configuração H2 (Leve e Rápido para Dev)
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:humainzedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
 
+      # Configuração JWT
+      JWT_SECRET: change-me
+
+      # Desativa exportação OTLP para Signoz (já que removemos)
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4317
+
+      # Limites Java
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

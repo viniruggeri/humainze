@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Humainze - Documentação Técnica</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        text-align: center;
+        padding: 3rem 0;
+        color: white;
+      }
+
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .docs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+      }
+
+      .doc-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+
+      .doc-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .doc-card h2 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .doc-card p {
+        color: #666;
+        margin-bottom: 1rem;
+      }
+
+      .doc-badge {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-top: 1rem;
+      }
+
+      .team-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .team-section h2 {
+        color: #667eea;
+        margin-bottom: 1rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+      }
+
+      .quick-links {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .quick-links h2 {
+        color: #667eea;
+        margin-bottom: 1rem;
+      }
+
+      .quick-links ul {
+        list-style: none;
+      }
+
+      .quick-links li {
+        padding: 0.5rem 0;
+      }
+
+      .quick-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+
+      .quick-links a:hover {
+        color: #764ba2;
+      }
+
+      .status-badge {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-left: 0.5rem;
+      }
+
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: white;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🚀 Humainze Backend</h1>
+        <p class="subtitle">
+          Documentação Técnica - Plataforma Cognitiva Integrada
+        </p>
+        <span class="status-badge">✅ Production Ready</span>
+      </header>
+
+      <div class="docs-grid">
+        <a href="README.html" class="doc-card">
+          <h2>📖 Página Inicial</h2>
+          <p>Visão geral da documentação, equipe e arquitetura do projeto.</p>
+          <span class="doc-badge">Comece aqui</span>
+        </a>
+
+        <a href="EXECUTIVE_SUMMARY.html" class="doc-card">
+          <h2>📋 Sumário Executivo</h2>
+          <p>Objetivos, stack tecnológico e visão geral do sistema.</p>
+          <span class="doc-badge">Gestão</span>
+        </a>
+
+        <a href="INTEGRATION_GUIDE_IA.html" class="doc-card">
+          <h2>🤖 Integração IA</h2>
+          <p>Como conectar módulos Python de Machine Learning ao backend.</p>
+          <span class="doc-badge">Team IA</span>
+        </a>
+
+        <a href="INTEGRATION_GUIDE_IOT.html" class="doc-card">
+          <h2>🔌 Integração IoT</h2>
+          <p>Guia completo para sensores Arduino/ESP32 e Raspberry Pi.</p>
+          <span class="doc-badge">Team IoT</span>
+        </a>
+
+        <a href="OTEL_INGESTION_ENDPOINTS.html" class="doc-card">
+          <h2>📡 Endpoints OpenTelemetry</h2>
+          <p>
+            Documentação dos endpoints de ingestão OTLP (métricas, traces,
+            logs).
+          </p>
+          <span class="doc-badge">Observabilidade</span>
+        </a>
+
+        <a href="PAYLOAD_EXAMPLES.html" class="doc-card">
+          <h2>📦 Exemplos de Payloads</h2>
+          <p>Payloads JSON prontos para usar em suas integrações.</p>
+          <span class="doc-badge">Referência</span>
+        </a>
+
+        <a href="SIGNOZ_VISUALIZATION.html" class="doc-card">
+          <h2>📊 Visualização SigNoz</h2>
+          <p>Como configurar dashboards e queries no SigNoz.</p>
+          <span class="doc-badge">Monitoramento</span>
+        </a>
+
+        <a href="ALERTS_SYSTEM.html" class="doc-card">
+          <h2>🚨 Sistema de Alertas</h2>
+          <p>Dashboard Streamlit, banner em tempo real, paginação e filtros.</p>
+          <span class="doc-badge">Novo!</span>
+        </a>
+
+        <a href="DEPLOY_AZURE.html" class="doc-card">
+          <h2>🚀 Deploy Azure VM</h2>
+          <p>Guia completo de deploy com Docker Compose no Azure.</p>
+          <span class="doc-badge">Deploy</span>
+        </a>
+      </div>
+
+      <div class="team-section">
+        <h2>👥 Equipe do Projeto</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>RM</th>
+              <th>Turma</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Barbara Bonome Filipus</strong></td>
+              <td>560431</td>
+              <td>2TDSPR</td>
+            </tr>
+            <tr>
+              <td><strong>Vinicius Lira Ruggeri</strong></td>
+              <td>560593</td>
+              <td>2TDSPR</td>
+            </tr>
+            <tr>
+              <td><strong>Yasmin Pereira da Silva</strong></td>
+              <td>560039</td>
+              <td>2TDSPR</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="quick-links">
+        <h2>🔗 Links Rápidos</h2>
+        <ul>
+          <li>
+            📄 <a href="../README.md" target="_blank">README Principal</a>
+          </li>
+          <li>📚 <a href="INDEX.html">Índice Completo</a></li>
+          <li>
+            🔧
+            <a href="http://localhost:8080/swagger-ui.html" target="_blank"
+              >Swagger UI (Local)</a
+            >
+          </li>
+          <li>
+            📊
+            <a href="http://localhost:8501" target="_blank"
+              >Dashboard Streamlit (Local)</a
+            >
+          </li>
+          <li>
+            💻
+            <a
+              href="https://github.com/viniruggeri/humainze-java"
+              target="_blank"
+              >GitHub Repository</a
+            >
+          </li>
+        </ul>
+      </div>
+
+      <div class="team-section">
+        <h2>✅ Requisitos FIAP Atendidos</h2>
+        <p>
+          Este projeto atende <strong>100%</strong> dos requisitos técnicos
+          FIAP:
+        </p>
+        <ul style="list-style-position: inside; margin-top: 1rem">
+          <li>✅ API Rest + Boas Práticas</li>
+          <li>✅ Spring Data JPA</li>
+          <li>✅ Relacionamentos entre Entidades</li>
+          <li>✅ Bean Validation</li>
+          <li>✅ Paginação, Ordenação e Filtros</li>
+          <li>✅ Documentação Swagger</li>
+          <li>✅ Autenticação JWT</li>
+          <li>✅ Deploy em Nuvem (Azure VM)</li>
+        </ul>
+      </div>
+
+      <footer>
+        <p><strong>Humainze Backend</strong> - Versão 1.0.0</p>
+        <p>Última atualização: 21/11/2025</p>
+      </footer>
+    </div>
+  </body>
+</html>

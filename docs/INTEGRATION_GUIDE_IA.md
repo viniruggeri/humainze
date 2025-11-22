@@ -1,74 +1,79 @@
 # 🤖 Guia de Integração - Time de IA
 
-## 📍 Visão Geral
+## 📏 Visão Geral
 
-Este guia descreve como o serviço de IA (Python com FastAPI/Flask) integra-se com o backend Java Humainze para:
+Este guia descreve como o serviço de IA (Python com FastAPI/Flask) integra-se com o **backend Java Humainze** para:
 
-1. **Autenticar** via API Key ou JWT
-2. **Enviar métricas** de modelos (acurácia, drift, latência, etc.)
-3. **Enviar alertas** cognitivos gerados por GPT-4
-4. **Visualizar tudo** no SigNoz em tempo real
+1. **Autenticar** via JWT (login simples)
+2. **Enviar métricas** de modelos ML (acurácia, drift, latência, loss)
+3. **Criar alertas cognitivos** (drift detectado, erro de modelo)
+4. **Visualizar tudo** no **Dashboard Streamlit customizado**
+5. **Consultar histórico** via APIs REST com paginação
+
+### Por que Backend Java como Observabilidade?
+
+✅ **Solução 100% open-source** - sem SigNoz, Grafana ou Datadog  
+✅ **Persistência em SQL** - métricas armazenadas em OracleDB/H2  
+✅ **APIs REST padronizadas** - `/export/metrics`, `/alerts`  
+✅ **Dashboard customizável** - Python + Streamlit, fácil de modificar  
+✅ **Sistema de alertas integrado** - DRIFT, MODEL_ERROR, SERVICE_DOWN  
+✅ **Simples e eficaz** - sem complexidade de setup
 
 ---
 
 ## 🔐 Autenticação
 
-### Opção 1: API Key (Recomendado para Scripts)
+### Login e Obtenção de Token JWT
+
+O time IA tem credenciais pré-cadastradas:
+- **Team:** `IA`
+- **Secret:** `ia-secret`
+
+**Passo 1: Login**
 
 ```python
 import requests
 
-API_KEY = "chave-ia"
 BASE_URL = "http://localhost:8080"
 
-# Usa API Key direto no header
-headers = {
-    "X-API-KEY": API_KEY,
-    "Content-Type": "application/json"
-}
-
-response = requests.get(
-    f"{BASE_URL}/otel/v1/metrics",
-    headers=headers
+# Login
+response = requests.post(
+    f"{BASE_URL}/auth/login",
+    json={
+        "team": "IA",
+        "secret": "ia-secret"
+    }
 )
+
+token_data = response.json()
+TOKEN = token_data["token"]
+print(f"Token obtido: {TOKEN[:20]}...")
 ```
 
-### Opção 2: JWT (Recomendado para Long-Running Services)
+**Resposta:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJJQSIsInJvbGVzIjpbIlJPTEVfSUEiXX0...",
+  "team": "IA",
+  "roles": ["ROLE_IA"]
+}
+```
+
+**Passo 2: Usar Token em Todas as Requisições**
 
 ```python
-import requests
-from datetime import datetime
-
-API_KEY = "chave-ia"
-BASE_URL = "http://localhost:8080"
-
-# 1. Obter JWT
-auth_response = requests.post(
-    f"{BASE_URL}/auth/token",
-    headers={"X-API-KEY": API_KEY}
-)
-
-token = auth_response.json()["token"]
-
-# 2. Usar JWT em requisições
 headers = {
-    "Authorization": f"Bearer {token}",
+    "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json"
 }
 
-# Agora usa o token nas requisições
-response = requests.get(
+# Exemplo: enviar métrica
+response = requests.post(
     f"{BASE_URL}/otel/v1/metrics",
-    headers=headers
+    headers=headers,
+    json={...}
 )
-```
-
-### Configurar no `.env` da IA
-
-```env
-HUMAINZE_API_KEY=chave-ia
-HUMAINZE_BASE_URL=http://localhost:8080
-HUMAINZE_TEAM_TAG=IA
 ```
 
 ---

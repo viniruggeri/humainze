@@ -25,6 +25,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // H2 Console usa frames
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -35,8 +36,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api-docs/**",
-                                "/docs/**"
-                        ).permitAll()
+                                "/docs/**",
+                                "/h2-console/**",
+                                "/dev/**")
+                        .permitAll()
 
                         // Observabilidade
                         .requestMatchers("/otel/v1/**").hasAnyRole("IA", "IOT", "JAVA")
@@ -45,8 +48,7 @@ public class SecurityConfig {
                         // Alertas
                         .requestMatchers("/alerts/**").hasAnyRole("IA", "ADMIN")
                         // Zero Trust
-                        .anyRequest().denyAll()
-                )
+                        .anyRequest().denyAll())
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, ApiKeyAuthenticationFilter.class);
 

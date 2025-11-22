@@ -26,7 +26,6 @@
 
 ## 📋 Índice
 
-- [Requisitos FIAP](#-requisitos-fiap-java-advanced-12)
 - [Quick Start](#-quick-start)
 - [Visão Geral](#-visão-geral)
 - [Arquitetura](#-arquitetura-técnica)
@@ -60,7 +59,7 @@ Este projeto atende **100%** dos requisitos técnicos FIAP:
 | **Ordenação** | ✅ | `sort=timestamp,desc` disponível em todos endpoints de listagem |
 | **Documentação Swagger** | ✅ | http://localhost:8080/swagger-ui.html (OpenAPI 3.0) |
 | **Autenticação JWT** | ✅ | JJWT (0.12.6) com secret 256+ bits, roles RBAC |
-| **Deploy em Nuvem** | ✅ | Docker, Dockerfile, docker-compose, Railway/Heroku ready |
+| **Deploy em Nuvem** | ✅ | Azure VM com Docker Compose (Backend + Dashboard) |
 
 **Nota:** Este projeto é **production-ready** e segue todos os padrões de boas práticas.
 
@@ -72,14 +71,21 @@ Este projeto atende **100%** dos requisitos técnicos FIAP:
 
 ```bash
 # Clonar
-git clone https://github.com/seu-usuario/humainze-backend.git
-cd humainze-backend
+git clone https://github.com/viniruggeri/humainze-java.git
+cd humainze-java
 
 # Build + Run (profile dev com H2)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-**Aplicação em:** `http://localhost:8080`
+**Aplicação em:** `http://localhost:8080`  
+**Dashboard:** `http://localhost:8501` (após subir dashboard)
+
+### 2️⃣ Documentação Completa
+
+🌐 **GitHub Pages:** [https://viniruggeri.github.io/humainze-java/](https://viniruggeri.github.io/humainze-java/)
+
+📖 Todos os guias de integração, exemplos de payload e tutoriais de deploy.
 
 ### 2️⃣ Testar Autenticação JWT
 
@@ -92,8 +98,6 @@ curl -X POST http://localhost:8080/auth/login \
 # Resposta
 {"token":"eyJhbGciOiJIUzI1NiJ9...","team":"IA","roles":["ROLE_IA"]}
 ```
-
-### 3️⃣ Enviar Primeira Métrica
 
 ```bash
 curl -X POST http://localhost:8080/otel/v1/metrics \
@@ -128,8 +132,9 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 
 - ✅ **Centralização de dados** de múltiplas fontes (IoT + IA)
 - ✅ **RBAC robusto** baseado em equipes (não usuários individuais)
-- ✅ **Observabilidade total** com OpenTelemetry + SigNoz
-- ✅ **Alertas inteligentes** com notificações por email
+- ✅ **Observabilidade open-source** - backend Java + dashboard Streamlit customizado
+- ✅ **Sistema de alertas cognitivos** em tempo real com auto-refresh
+- ✅ **Solução completa sem dependências externas** (SigNoz, Grafana, etc.)
 - ✅ **Arquitetura pronta para produção** com Spring Boot 3.5
 
 ---
@@ -145,13 +150,13 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 | **Web** | Spring Web, Spring WebFlux |
 | **Persistência** | Spring Data JPA, Hibernate |
 | **Segurança** | Spring Security, JWT (JJWT) |
-| **Observabilidade** | OpenTelemetry, Micrometer, Spring Actuator |
+| **Observabilidade** | Spring Actuator, Métricas customizadas |
+| **Dashboard** | Streamlit (Python), Plotly, Pandas |
 | **Documentação** | Springdoc OpenAPI 3.0 (Swagger) |
 | **Banco de Dados** | OracleDB (prod), H2 (dev) |
 | **Validação** | Bean Validation (Jakarta) |
-| **Email** | Spring Mail (SMTP) |
 | **Build** | Maven, Jib (containerização) |
-| **Telemetria** | SigNoz (OTLP/HTTP) |
+| **Deploy** | Docker, Docker Compose, Azure VM |
 
 ### Diagrama de Arquitetura
 
@@ -238,14 +243,16 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 - ✅ **Resolução de alertas** com tracking
 - ✅ **Histórico completo** com paginação
 
-### 📊 Observabilidade
+### 📊 Observabilidade Open-Source
 
-- ✅ **OpenTelemetry nativo** (OTLP/HTTP)
-- ✅ **Métricas Micrometer** exportadas para SigNoz
-- ✅ **Tracing distribuído** com spans customizados
-- ✅ **Logs estruturados** JSON
-- ✅ **Health checks** via Actuator
-- ✅ **Dashboard observável** em tempo real
+- ✅ **Backend Java como servidor OTLP** - recebe métricas, traces e logs
+- ✅ **Persistência em banco relacional** (OracleDB/H2)
+- ✅ **APIs REST para consulta** com paginação, filtros e ordenação
+- ✅ **Dashboard Streamlit customizado** - visualizações em tempo real
+- ✅ **Gráficos interativos** com Plotly (time series, gauges, barras)
+- ✅ **Sistema de alertas integrado** - banner + histórico completo
+- ✅ **Health checks** via Spring Actuator
+- ✅ **Solução 100% open-source** sem dependências proprietárias
 
 ### 📖 Documentação
 
@@ -264,10 +271,10 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 |----|-----------|------------|--------|
 | **RF-BACK-01** | Sistema deve autenticar equipes via JWT com secret seguro | Alta | ✅ |
 | **RF-BACK-02** | RBAC baseado em equipes (não usuários individuais) | Alta | ✅ |
-| **RF-BACK-03** | Ingestão de métricas OTEL via POST /otel/v1/metrics | Alta | ✅ |
-| **RF-BACK-04** | Ingestão de traces OTEL via POST /otel/v1/traces | Alta | ✅ |
-| **RF-BACK-05** | Ingestão de logs OTEL via POST /otel/v1/logs | Alta | ✅ |
-| **RF-BACK-06** | Exportação OTEL para SigNoz via GET /export/* | Alta | ✅ |
+| **RF-BACK-03** | Ingestão de métricas via POST /otel/v1/metrics | Alta | ✅ |
+| **RF-BACK-04** | Ingestão de traces via POST /otel/v1/traces | Alta | ✅ |
+| **RF-BACK-05** | Ingestão de logs via POST /otel/v1/logs | Alta | ✅ |
+| **RF-BACK-06** | Consulta de métricas/traces/logs via GET /export/* | Alta | ✅ |
 | **RF-BACK-07** | CRUD completo de equipes (Teams) | Média | ✅ |
 | **RF-BACK-08** | CRUD de roles e associação com equipes | Média | ✅ |
 | **RF-BACK-09** | Sistema de alertas com tipos DRIFT, MODEL_ERROR, SERVICE_DOWN | Alta | ✅ |
@@ -309,11 +316,18 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 
 ---
 
-## 📡 Observabilidade
+## 📡 Observabilidade Open-Source
 
-### Configuração OpenTelemetry
+### Arquitetura de Observabilidade
 
-O Humainze Backend exporta métricas, traces e logs para **SigNoz** via protocolo OTLP/HTTP.
+O Humainze Backend é uma **solução completa de observabilidade open-source** que elimina dependências de ferramentas externas como SigNoz, Grafana ou Datadog.
+
+**Como funciona:**
+1. **IoT/IA enviam dados** → Backend Java (endpoints /otel/v1/*)
+2. **Backend persiste** → OracleDB ou H2 (métricas, traces, logs)
+3. **Dashboard Streamlit consome** → APIs REST com paginação
+4. **Visualizações customizadas** → Plotly (gráficos interativos)
+5. **Alertas em tempo real** → Banner + histórico com filtros
 
 #### Variáveis de Ambiente
 
