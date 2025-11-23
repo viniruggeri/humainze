@@ -529,39 +529,6 @@ with st.spinner("🔍 Carregando telemetria..."):
     traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
     logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
 
-# KPIs Principais
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.metric(
-        label="📊 Métricas",
-        value=len(metrics_data),
-        delta=f"+{len(metrics_data) % 10}" if metrics_data else "0"
-    )
-
-with col2:
-    st.metric(
-        label="🔗 Traces",
-        value=len(traces_data),
-        delta=f"+{len(traces_data) % 5}" if traces_data else "0"
-    )
-
-with col3:
-    st.metric(
-        label="📜 Logs",
-        value=len(logs_data),
-        delta=f"+{len(logs_data) % 8}" if logs_data else "0"
-    )
-
-with col4:
-    st.metric(
-        label="⚡ Latência Média",
-        value="12ms",
-        delta="-3ms"
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
-
 # Tabs Principais
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
@@ -623,12 +590,18 @@ with tab1:
             df = pd.DataFrame(flat_metrics)
             st.success(f"✅ {len(df)} pontos de dados carregados")
             
+            # DEBUG: Show available metric names
+            st.write("🔍 DEBUG - Metric names in dataframe:", df['metric_name'].unique().tolist())
+            
             # Pegar role do session state
             role = st.session_state.role
+            st.write(f"🔍 DEBUG - Current role: {role}")
+            st.write(f"🔍 DEBUG - Total rows in df: {len(df)}")
             
             # Visualizações específicas por Team
             if role == "ROLE_IOT":
                 st.subheader("🌡️ Monitoramento de Sensores ESP32")
+                st.write("🔍 DEBUG - Entering IoT section")
                 
                 # Definir métricas IoT com ícones e cores
                 iot_metrics = {
@@ -639,10 +612,14 @@ with tab1:
                 }
                 
                 for metric_key, config in iot_metrics.items():
+                    st.write(f"🔍 DEBUG - Checking metric: {metric_key}")
                     metric_df = df[df['metric_name'] == metric_key]
+                    st.write(f"🔍 DEBUG - Found {len(metric_df)} rows for {metric_key}")
+                    
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
                         st.write(f"📊 {len(metric_df)} pontos | Dispositivos: {len(metric_df['service_name'].unique())}")
+                        st.write(f"🔍 DEBUG - Creating chart for {metric_key}...")
                         
                         fig = go.Figure()
                         for service in metric_df['service_name'].unique():
@@ -673,7 +650,9 @@ with tab1:
                             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                         )
                         
+                        st.write(f"🔍 DEBUG - Chart created, calling st.plotly_chart()...")
                         st.plotly_chart(fig, use_container_width=True)
+                        st.write(f"🔍 DEBUG - Chart rendered successfully!")
                         
                         # Estatísticas rápidas
                         col1, col2, col3 = st.columns(3)
@@ -882,18 +861,6 @@ with tab1:
                     )
                     st.plotly_chart(fig_timeline, use_container_width=True)
             
-            # Tabela resumida
-            st.subheader("📋 Últimas Leituras")
-            summary_df = df.groupby(['metric_name', 'service_name']).agg({
-                'value': ['last', 'mean', 'std'],
-                'timestamp': 'max'
-            }).reset_index()
-            summary_df.columns = ['Métrica', 'Serviço', 'Último Valor', 'Média', 'Desvio', 'Timestamp']
-            st.dataframe(summary_df, use_container_width=True, height=300)
-            
-            if show_raw_data:
-                with st.expander("🔍 Dados Brutos"):
-                    st.dataframe(df, use_container_width=True)
 
 with tab2:
     if not traces_data:
