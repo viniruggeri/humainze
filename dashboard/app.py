@@ -569,146 +569,144 @@ with tab1:
     if not metrics_data:
         st.warning("⚠️ Nenhuma métrica disponível no momento.")
     else:
-        df = pd.DataFrame(metrics_data)
+        # Parse payloadJson para extrair métricas
+        parsed_metrics = []
+        for item in metrics_data:
+            try:
+                payload = json.loads(item['payloadJson'])
+                # Extrair dados básicos
+                parsed_metrics.append({
+                    'id': item['id'],
+                    'teamTag': item['teamTag'],
+                    'timestamp': item['timestamp'],
+                    'payload': payload
+                })
+            except:
+                continue
         
-        if hide_system_metrics:
-            system_prefixes = ['jvm', 'process', 'system', 'tomcat', 'hikaricp', 'jdbc', 'disk', 'logback']
-            df = df[~df['metric_name'].str.startswith(tuple(system_prefixes))]
-        
-        if df.empty:
-            st.info("ℹ️ Desmarque 'Ocultar métricas JVM' para visualizar métricas de sistema")
+        if not parsed_metrics:
+            st.warning("⚠️ Nenhuma métrica válida encontrada.")
         else:
-            # Gráfico principal
-            metric_names = df['metric_name'].unique()
-            selected_metric = st.selectbox("🎯 Selecione a Métrica", metric_names, key="metric_selector")
+            st.success(f"✅ {len(parsed_metrics)} métricas carregadas")
             
-            if selected_metric:
-                filtered_df = df[df['metric_name'] == selected_metric].copy()
-                filtered_df['timestamp'] = pd.to_datetime(filtered_df['timestamp'])
-                
-                fig = go.Figure()
-                
-                for service in filtered_df['service_name'].unique():
-                    service_data = filtered_df[filtered_df['service_name'] == service]
-                    fig.add_trace(go.Scatter(
-                        x=service_data['timestamp'],
-                        y=service_data['value'],
-                        mode='lines+markers',
-                        name=service,
-                        line=dict(width=3),
-                        marker=dict(size=8)
-                    ))
-                
-                fig.update_layout(
-                    title=dict(
-                        text=f"📊 {selected_metric}",
-                        font=dict(size=24, color='#00d4ff', family='Arial Black')
-                    ),
-                    xaxis_title="Timestamp",
-                    yaxis_title="Valor",
-                    template="plotly_dark",
-                    hovermode='x unified',
-                    height=500,
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
+            # Mostrar métricas em cards
+            cols = st.columns(3)
+            for idx, metric in enumerate(parsed_metrics[:6]):
+                with cols[idx % 3]:
+                    st.metric(
+                        label=f"{metric['teamTag']} Metric #{metric['id']}",
+                        value=metric['timestamp'][:19],
+                        delta=None
+                    )
+            
+            # Mostrar tabela com últimas métricas
+            st.subheader("📊 Últimas Métricas")
+            df_display = pd.DataFrame([
+                {
+                    'ID': m['id'],
+                    'Team': m['teamTag'],
+                    'Timestamp': m['timestamp'][:19]
+                }
+                for m in parsed_metrics
+            ])
+            st.dataframe(df_display, use_container_width=True)
             
             if show_raw_data:
-                with st.expander("🔍 Dados Brutos"):
-                    st.dataframe(df, use_container_width=True, height=400)
+                with st.expander("🔍 Dados Brutos - Payload JSON"):
+                    for m in parsed_metrics[:5]:
+                        st.json(m['payload'])
 
 with tab2:
     if not traces_data:
         st.info("ℹ️ Nenhum trace capturado. Execute operações na aplicação.")
     else:
-        df_traces = pd.DataFrame(traces_data)
+        # Parse traces
+        parsed_traces = []
+        for item in traces_data:
+            try:
+                payload = json.loads(item['payloadJson'])
+                parsed_traces.append({
+                    'id': item['id'],
+                    'teamTag': item['teamTag'],
+                    'timestamp': item['timestamp'],
+                    'payload': payload
+                })
+            except:
+                continue
         
-        # Estatísticas de traces
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total de Spans", len(df_traces))
-        with col2:
-            if 'duration_ms' in df_traces.columns:
-                avg_duration = df_traces['duration_ms'].mean()
-                st.metric("Duração Média", f"{avg_duration:.2f}ms")
-        with col3:
-            unique_operations = df_traces['operation_name'].nunique() if 'operation_name' in df_traces.columns else 0
-            st.metric("Operações Únicas", unique_operations)
-        
-        # Timeline de traces
-        if 'timestamp' in df_traces.columns and 'duration_ms' in df_traces.columns:
-            df_traces['timestamp'] = pd.to_datetime(df_traces['timestamp'])
+        if not parsed_traces:
+            st.warning("⚠️ Nenhum trace válido encontrado.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total de Traces", len(parsed_traces))
+            with col2:
+                st.metric("IA Traces", len([t for t in parsed_traces if t['teamTag'] == 'IA']))
+            with col3:
+                st.metric("IOT Traces", len([t for t in parsed_traces if t['teamTag'] == 'IOT']))
             
-            fig = px.scatter(
-                df_traces,
-                x='timestamp',
-                y='duration_ms',
-                color='operation_name',
-                size='duration_ms',
-                hover_data=['trace_id', 'service_name', 'status_code'],
-                title="⏱️ Timeline de Traces"
-            )
+            # Mostrar tabela
+            st.subheader("🔍 Traces Capturados")
+            df_display = pd.DataFrame([
+                {
+                    'ID': t['id'],
+                    'Team': t['teamTag'],
+                    'Timestamp': t['timestamp'][:19]
+                }
+                for t in parsed_traces
+            ])
+            st.dataframe(df_display, use_container_width=True)
             
-            fig.update_layout(
-                template="plotly_dark",
-                height=400,
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Tabela de traces
-        st.dataframe(
-            df_traces[['timestamp', 'trace_id', 'service_name', 'operation_name', 'duration_ms', 'status_code']],
-            use_container_width=True,
-            height=400
-        )
+            if show_raw_data:
+                with st.expander("🔍 Dados Brutos - Traces JSON"):
+                    for t in parsed_traces[:5]:
+                        st.json(t['payload'])
 
 with tab3:
     if not logs_data:
         st.info("ℹ️ Nenhum log capturado. Verifique a configuração do logback.")
     else:
-        df_logs = pd.DataFrame(logs_data)
+        # Parse logs
+        parsed_logs = []
+        for item in logs_data:
+            try:
+                payload = json.loads(item['payloadJson'])
+                parsed_logs.append({
+                    'id': item['id'],
+                    'teamTag': item['teamTag'],
+                    'timestamp': item['timestamp'],
+                    'payload': payload
+                })
+            except:
+                continue
         
-        # Filtro de severidade
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            severity_filter = st.multiselect(
-                "Severidade",
-                options=df_logs['severity_text'].unique() if 'severity_text' in df_logs.columns else [],
-                default=df_logs['severity_text'].unique() if 'severity_text' in df_logs.columns else []
-            )
-        
-        if severity_filter:
-            df_logs = df_logs[df_logs['severity_text'].isin(severity_filter)]
-        
-        # Distribuição de logs por severidade
-        if 'severity_text' in df_logs.columns:
-            fig = px.pie(
-                df_logs,
-                names='severity_text',
-                title="📊 Distribuição de Logs por Severidade",
-                hole=0.4,
-                color_discrete_sequence=px.colors.sequential.RdBu
-            )
+        if not parsed_logs:
+            st.warning("⚠️ Nenhum log válido encontrado.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total de Logs", len(parsed_logs))
+            with col2:
+                st.metric("IA Logs", len([l for l in parsed_logs if l['teamTag'] == 'IA']))
+            with col3:
+                st.metric("IOT Logs", len([l for l in parsed_logs if l['teamTag'] == 'IOT']))
             
-            fig.update_layout(
-                template="plotly_dark",
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-            )
+            # Mostrar tabela
+            st.subheader("📄 Logs Capturados")
+            df_display = pd.DataFrame([
+                {
+                    'ID': l['id'],
+                    'Team': l['teamTag'],
+                    'Timestamp': l['timestamp'][:19]
+                }
+                for l in parsed_logs
+            ])
+            st.dataframe(df_display, use_container_width=True)
             
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Tabela de logs
-        st.dataframe(
-            df_logs[['timestamp', 'severity_text', 'body', 'service_name']],
-            use_container_width=True,
-            height=400
-        )
+            if show_raw_data:
+                with st.expander("🔍 Dados Brutos - Logs JSON"):
+                    for l in parsed_logs[:5]:
+                        st.json(l['payload'])
 
 with tab4:
     st.markdown("### 🎯 Central de Alertas Cognitivos")
