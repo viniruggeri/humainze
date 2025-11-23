@@ -18,8 +18,7 @@ import java.time.Instant;
 public class LogRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "log_seq")
-    @jakarta.persistence.SequenceGenerator(name = "log_seq", sequenceName = "LOG_RECORDS_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false)
