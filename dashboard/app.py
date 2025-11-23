@@ -384,6 +384,42 @@ with st.spinner("🔍 Carregando telemetria..."):
     traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
     logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
 
+# TESTE ABSOLUTO - ANTES DAS TABS
+st.header("🧪 TESTE DE PLOTLY - Se você não vê um gráfico abaixo, há um problema")
+print("=" * 100)
+print("TESTE ABSOLUTO ANTES DAS TABS")
+print("=" * 100)
+
+try:
+    absolute_test_fig = go.Figure()
+    absolute_test_fig.add_trace(go.Scatter(
+        x=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        y=[1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+        mode='lines+markers',
+        name='y = x²',
+        line=dict(color='cyan', width=4),
+        marker=dict(size=10, color='yellow')
+    ))
+    absolute_test_fig.update_layout(
+        title="GRÁFICO DE TESTE - y = x²",
+        xaxis_title="X",
+        yaxis_title="Y",
+        template="plotly_dark",
+        height=500
+    )
+    print("Figure criada com sucesso")
+    st.plotly_chart(absolute_test_fig, width='stretch')
+    print("st.plotly_chart executado")
+    st.success("✅ SUCESSO! Se você vê o gráfico acima, Plotly funciona!")
+except Exception as e:
+    print(f"ERRO NO TESTE ABSOLUTO: {e}")
+    import traceback
+    traceback.print_exc()
+    st.error(f"❌ ERRO: {e}")
+
+st.divider()
+st.write("---")
+
 # Tabs Principais
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
