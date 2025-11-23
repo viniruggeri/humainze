@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 # Configuração
 BACKEND_URL = "http://172.161.94.218:8081"
 API_KEY = "chave-iot"
-TOTAL_METRICS = 250
+TOTAL_METRICS = 20
 
 # Autenticar
 print("[AUTH] Autenticando no backend...")
