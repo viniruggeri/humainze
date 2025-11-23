@@ -639,9 +639,10 @@ with tab1:
                 }
                 
                 for metric_key, config in iot_metrics.items():
-                    metric_df = df[df['metric_name'].str.contains(metric_key, case=False, na=False)]
+                    metric_df = df[df['metric_name'] == metric_key]
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
+                        st.write(f"📊 {len(metric_df)} pontos | Dispositivos: {len(metric_df['service_name'].unique())}")
                         
                         fig = go.Figure()
                         for service in metric_df['service_name'].unique():
@@ -696,7 +697,7 @@ with tab1:
                 }
                 
                 for metric_key, config in ia_metrics.items():
-                    metric_df = df[df['metric_name'].str.contains(metric_key, case=False, na=False)]
+                    metric_df = df[df['metric_name'] == metric_key]
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
                         
