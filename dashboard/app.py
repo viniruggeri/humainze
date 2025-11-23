@@ -221,33 +221,18 @@ def fetch_secure_metrics(token, role):
     """Busca métricas do backend Java"""
     try:
         headers = {"Authorization": f"Bearer {token}"}
-        url = f"{JAVA_BACKEND_URL}/export/metrics"
-        params = {"page": 0, "size": 500}
-        
-        print(f"🔍 DEBUG: Fetching metrics from {url} with params {params}")
-        print(f"🔍 DEBUG: Token prefix: {token[:20] if token else 'None'}...")
-        
         response = requests.get(
-            url,
+            f"{JAVA_BACKEND_URL}/export/metrics",
             headers=headers,
-            params=params,
+            params={"page": 0, "size": 500},
             timeout=10
         )
-        
-        print(f"🔍 DEBUG: Response status: {response.status_code}")
-        
         if response.status_code == 200:
             data = response.json()
-            content = data.get("content", [])
-            print(f"🔍 DEBUG: Received {len(content)} metrics from backend")
-            return content
-        else:
-            print(f"❌ DEBUG: Error response: {response.text[:200]}")
-            return []
+            return data.get("content", [])
+        return []
     except Exception as e:
-        print(f"❌ Erro ao buscar métricas: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"Erro ao buscar métricas: {e}")
         return []
 
 def fetch_secure_traces(token, role):
@@ -581,23 +566,33 @@ st.markdown("<br>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
 with tab1:
-    st.info(f"🔍 DEBUG: metrics_data length = {len(metrics_data) if metrics_data else 0}")
-    st.info(f"🔍 DEBUG: role = {st.session_state.role}")
-    
     if not metrics_data:
         st.warning("⚠️ Nenhuma métrica disponível no momento.")
     else:
-        st.success(f"✅ Recebidos {len(metrics_data)} registros do backend")
         # Parse payloadJson para extrair métricas detalhadas
         flat_metrics = []
         for item in metrics_data:
             try:
                 payload = json.loads(item['payloadJson'])
                 for rm in payload.get('resourceMetrics', []):
+                    # Extrair atributos do resource
                     service_name = 'unknown'
+                    device_id = None
+                    model_name = None
+                    
                     for attr in rm.get('resource', {}).get('attributes', []):
-                        if attr.get('key') == 'service.name':
-                            service_name = attr.get('value', {}).get('stringValue', 'unknown')
+                        key = attr.get('key')
+                        value = attr.get('value', {}).get('stringValue', '')
+                        
+                        if key == 'service.name':
+                            service_name = value
+                        elif key == 'device.id':
+                            device_id = value
+                        elif key == 'model.name':
+                            model_name = value
+                    
+                    # Use device_id para IoT ou model_name para IA, fallback para service_name
+                    display_name = device_id or model_name or service_name
                     
                     for sm in rm.get('scopeMetrics', []):
                         for metric in sm.get('metrics', []):
@@ -613,7 +608,7 @@ with tab1:
                                 
                                 flat_metrics.append({
                                     'metric_name': metric_name,
-                                    'service_name': service_name,
+                                    'service_name': display_name,  # Usando device_id ou model_name
                                     'value': value,
                                     'unit': unit,
                                     'timestamp': timestamp,
@@ -631,11 +626,6 @@ with tab1:
             # Pegar role do session state
             role = st.session_state.role
             
-            # Debug: mostrar métricas únicas
-            st.info(f"🔍 Métricas encontradas: {df['metric_name'].unique().tolist()[:10]}")
-            st.info(f"🔍 Role atual: {role}")
-            st.info(f"🔍 Teams no DataFrame: {df['teamTag'].unique().tolist()}")
-            
             # Visualizações específicas por Team
             if role == "ROLE_IOT":
                 st.subheader("🌡️ Monitoramento de Sensores ESP32")
@@ -650,7 +640,6 @@ with tab1:
                 
                 for metric_key, config in iot_metrics.items():
                     metric_df = df[df['metric_name'].str.contains(metric_key, case=False, na=False)]
-                    st.info(f"🔍 {metric_key}: {len(metric_df)} pontos encontrados")
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
                         
