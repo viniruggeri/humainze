@@ -28,13 +28,8 @@ services:
       # Spring Profile
       - SPRING_PROFILES_ACTIVE=prod
 
-      # OpenTelemetry
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
-
       # JVM Options
       - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
-    depends_on:
-      - collector
     networks:
       - humainze-network
     restart: unless-stopped
@@ -108,7 +103,13 @@ services:
     volumes:
       - collector-data:/app/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4318/api/metrics?role=ROLE_ADMIN"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:4318/api/metrics?role=ROLE_ADMIN",
+        ]
       interval: 30s
       timeout: 3s
       retries: 3

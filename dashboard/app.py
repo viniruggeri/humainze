@@ -218,39 +218,57 @@ def login(api_key):
         return None, None, None
 
 def fetch_secure_metrics(token, role):
-    """Busca métricas do coletor Python"""
+    """Busca métricas do backend Java"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(
-            f"{PYTHON_COLLECTOR_URL}/api/metrics",
-            params={"role": role},
-            timeout=5
+            f"{JAVA_BACKEND_URL}/export/metrics",
+            headers=headers,
+            params={"page": 0, "size": 500},
+            timeout=10
         )
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("content", [])
+        return []
+    except Exception as e:
+        print(f"Erro ao buscar métricas: {e}")
         return []
 
 def fetch_secure_traces(token, role):
-    """Busca traces do coletor Python"""
+    """Busca traces do backend Java"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(
-            f"{PYTHON_COLLECTOR_URL}/api/traces",
-            params={"role": role},
-            timeout=5
+            f"{JAVA_BACKEND_URL}/export/traces",
+            headers=headers,
+            params={"page": 0, "size": 500},
+            timeout=10
         )
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("content", [])
+        return []
+    except Exception as e:
+        print(f"Erro ao buscar traces: {e}")
         return []
 
 def fetch_secure_logs(token, role):
-    """Busca logs do coletor Python"""
+    """Busca logs do backend Java"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(
-            f"{PYTHON_COLLECTOR_URL}/api/logs",
-            params={"role": role},
-            timeout=5
+            f"{JAVA_BACKEND_URL}/export/logs",
+            headers=headers,
+            params={"page": 0, "size": 500},
+            timeout=10
         )
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("content", [])
+        return []
+    except Exception as e:
+        print(f"Erro ao buscar logs: {e}")
         return []
 
 def fetch_alerts_count(token, role):
