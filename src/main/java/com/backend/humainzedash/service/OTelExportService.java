@@ -21,26 +21,38 @@ public class OTelExportService {
     private final LogRecordRepository logRecordRepository;
 
     public Page<OtelExportResponse> exportMetrics(String teamTag, Pageable pageable) {
+        if (teamTag == null) {
+            return metricRecordRepository.findAll(pageable).map(this::toResponse);
+        }
         return metricRecordRepository.findByTeamTagIgnoreCase(teamTag, pageable).map(this::toResponse);
     }
 
     public Page<OtelExportResponse> exportTraces(String teamTag, Pageable pageable) {
+        if (teamTag == null) {
+            return spanRecordRepository.findAll(pageable).map(this::toResponse);
+        }
         return spanRecordRepository.findByTeamTagIgnoreCase(teamTag, pageable).map(this::toResponse);
     }
 
     public Page<OtelExportResponse> exportLogs(String teamTag, Pageable pageable) {
+        if (teamTag == null) {
+            return logRecordRepository.findAll(pageable).map(this::toResponse);
+        }
         return logRecordRepository.findByTeamTagIgnoreCase(teamTag, pageable).map(this::toResponse);
     }
 
     private OtelExportResponse toResponse(MetricRecord record) {
-        return new OtelExportResponse(record.getId(), record.getTeamTag(), record.getTimestamp(), record.getPayloadJson());
+        return new OtelExportResponse(record.getId(), record.getTeamTag(), record.getTimestamp(),
+                record.getPayloadJson());
     }
 
     private OtelExportResponse toResponse(SpanRecord record) {
-        return new OtelExportResponse(record.getId(), record.getTeamTag(), record.getTimestamp(), record.getPayloadJson());
+        return new OtelExportResponse(record.getId(), record.getTeamTag(), record.getTimestamp(),
+                record.getPayloadJson());
     }
 
     private OtelExportResponse toResponse(LogRecord record) {
-        return new OtelExportResponse(record.getId(), record.getTeamTag(), record.getTimestamp(), record.getPayloadJson());
+        return new OtelExportResponse(record.getId(), record.getTeamTag(), record.getTimestamp(),
+                record.getPayloadJson());
     }
 }
