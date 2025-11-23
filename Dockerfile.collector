@@ -1,0 +1,31 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements para o coletor
+COPY dashboard/requirements.txt .
+
+# Instalar dependências Python
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+    fastapi==0.115.5 \
+    uvicorn==0.34.0 \
+    opentelemetry-proto==1.29.0 \
+    protobuf==5.29.2
+
+# Copiar código do coletor
+COPY dashboard/collector_fastapi.py .
+
+# Criar diretório para banco de dados
+RUN mkdir -p /app/data
+
+# Expor porta 4318 (OTLP HTTP)
+EXPOSE 4318
+
+# Rodar coletor
+CMD ["python", "collector_fastapi.py"]

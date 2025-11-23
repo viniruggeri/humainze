@@ -26,24 +26,24 @@ public class OTelExportController {
     @Operation(summary = "Exporta métricas em formato OTLP")
     @GetMapping("/metrics")
     public ResponseEntity<Page<OtelExportResponse>> metrics(@RequestParam(required = false) String teamTag,
-                                                            Pageable pageable,
-                                                            Authentication authentication) {
+            Pageable pageable,
+            Authentication authentication) {
         return ResponseEntity.ok(oTelExportService.exportMetrics(resolveTeam(authentication, teamTag), pageable));
     }
 
     @Operation(summary = "Exporta traces em formato OTLP")
     @GetMapping("/traces")
     public ResponseEntity<Page<OtelExportResponse>> traces(@RequestParam(required = false) String teamTag,
-                                                           Pageable pageable,
-                                                           Authentication authentication) {
+            Pageable pageable,
+            Authentication authentication) {
         return ResponseEntity.ok(oTelExportService.exportTraces(resolveTeam(authentication, teamTag), pageable));
     }
 
     @Operation(summary = "Exporta logs em formato OTLP")
     @GetMapping("/logs")
     public ResponseEntity<Page<OtelExportResponse>> logs(@RequestParam(required = false) String teamTag,
-                                                         Pageable pageable,
-                                                         Authentication authentication) {
+            Pageable pageable,
+            Authentication authentication) {
         return ResponseEntity.ok(oTelExportService.exportLogs(resolveTeam(authentication, teamTag), pageable));
     }
 
@@ -51,10 +51,11 @@ public class OTelExportController {
         boolean admin = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch("ROLE_ADMIN"::equals);
-        if (admin && requested != null) {
+        if (admin) {
+            // Admin sem filtro vê tudo (null), com filtro vê o team específico
             return requested;
         }
+        // Usuários não-admin sempre veem apenas seu próprio team
         return authentication.getName();
     }
 }
-

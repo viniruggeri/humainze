@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/dev/**")
                         .permitAll()
                         .requestMatchers("/otel/v1/**").hasAnyRole("IA", "IOT", "JAVA")
+                        .requestMatchers("/export/**").hasAnyRole("IA", "IOT", "JAVA", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/alerts/**").hasAnyRole("IA", "ADMIN")
                         .anyRequest().denyAll())

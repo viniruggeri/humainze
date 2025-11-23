@@ -13,6 +13,8 @@ spring:
         format_sql: true
         jdbc:
           batch_size: 50
+        id:
+          new_generator_mappings: true
     open-in-view: false
   jackson:
     serialization:

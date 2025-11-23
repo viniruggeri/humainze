@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import json
 import time
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
@@ -16,163 +17,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS para UI moderna
+# CSS mínimo - removido para debug
 st.markdown("""
 <style>
-    /* Tema Dark Profissional */
     .stApp {
-        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-    }
-    
-    /* Cards modernos */
-    div[data-testid="stMetricValue"] {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #00d4ff;
-    }
-    
-    div[data-testid="stMetricLabel"] {
-        font-size: 1rem;
-        color: #8b92a8;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-    }
-    
-    /* Sidebar elegante */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-        border-right: 1px solid #00d4ff33;
-    }
-    
-    /* Botões modernos */
-    .stButton>button {
-        background: linear-gradient(90deg, #00d4ff 0%, #0099cc 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
-    }
-    
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
-    }
-    
-    /* Tabs estilizadas */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
-        background: #1a1a2e;
-        border-radius: 10px;
-        padding: 1rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: 3rem;
-        background: transparent;
-        color: #8b92a8;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 0 2rem;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(90deg, #00d4ff 0%, #0099cc 100%);
-        color: white;
-    }
-    
-    /* Badge de role */
-    .role-badge {
-        display: inline-block;
-        padding: 0.5rem 1.5rem;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        margin: 0.5rem 0;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .role-admin {
-        background: linear-gradient(90deg, #ff0844 0%, #ff6b6b 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(255, 8, 68, 0.4);
-    }
-    
-    .role-ia {
-        background: linear-gradient(90deg, #4158d0 0%, #c850c0 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(65, 88, 208, 0.4);
-    }
-    
-    .role-iot {
-        background: linear-gradient(90deg, #0ba360 0%, #3cba92 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(11, 163, 96, 0.4);
-    }
-    
-    /* Cards com glassmorphism */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 2rem;
-        margin: 1rem 0;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
-    
-    /* Títulos com gradiente */
-    .gradient-title {
-        background: linear-gradient(90deg, #00d4ff 0%, #0099cc 50%, #00d4ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 3rem;
-        font-weight: 900;
-        margin-bottom: 0.5rem;
-        animation: gradient-shift 3s ease infinite;
-        background-size: 200% auto;
-    }
-    
-    @keyframes gradient-shift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    
-    /* Status indicators */
-    .status-online {
-        color: #0ba360;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .status-online::before {
-        content: "●";
-        font-size: 1.5rem;
-        animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    
-    /* Dataframe styling */
-    .dataframe {
-        border-radius: 10px !important;
-        overflow: hidden;
+        background: #0f0f23;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Constantes
-JAVA_BACKEND_URL = "http://localhost:8081"
-PYTHON_COLLECTOR_URL = "http://localhost:4318"
+JAVA_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8081")
+PYTHON_COLLECTOR_URL = os.getenv("COLLECTOR_URL", "http://collector:4318")
 
 # ========== SESSÃO ==========
 if 'token' not in st.session_state:
@@ -217,39 +73,57 @@ def login(api_key):
         return None, None, None
 
 def fetch_secure_metrics(token, role):
-    """Busca métricas do coletor"""
+    """Busca métricas do backend Java"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(
-            f"{PYTHON_COLLECTOR_URL}/api/metrics",
-            params={"role": role},
-            timeout=5
+            f"{JAVA_BACKEND_URL}/export/metrics",
+            headers=headers,
+            params={"page": 0, "size": 500},
+            timeout=10
         )
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("content", [])
+        return []
+    except Exception as e:
+        print(f"Erro ao buscar métricas: {e}")
         return []
 
-def fetch_secure_traces(role):
-    """Busca traces do coletor"""
+def fetch_secure_traces(token, role):
+    """Busca traces do backend Java"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(
-            f"{PYTHON_COLLECTOR_URL}/api/traces",
-            params={"role": role},
-            timeout=5
+            f"{JAVA_BACKEND_URL}/export/traces",
+            headers=headers,
+            params={"page": 0, "size": 500},
+            timeout=10
         )
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("content", [])
+        return []
+    except Exception as e:
+        print(f"Erro ao buscar traces: {e}")
         return []
 
-def fetch_secure_logs(role):
-    """Busca logs do coletor"""
+def fetch_secure_logs(token, role):
+    """Busca logs do backend Java"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(
-            f"{PYTHON_COLLECTOR_URL}/api/logs",
-            params={"role": role},
-            timeout=5
+            f"{JAVA_BACKEND_URL}/export/logs",
+            headers=headers,
+            params={"page": 0, "size": 500},
+            timeout=10
         )
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("content", [])
+        return []
+    except Exception as e:
+        print(f"Erro ao buscar logs: {e}")
         return []
 
 def fetch_alerts_count(token, role):
@@ -505,191 +379,520 @@ if alerts_count > 0:
                 st.info("Nenhum alerta não resolvido encontrado.")
 
 # Buscar dados
-with st.spinner("🔍 Carregando telemetria..."):
-    metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
-    traces_data = fetch_secure_traces(st.session_state.role)
-    logs_data = fetch_secure_logs(st.session_state.role)
+st.write("🔄 Iniciando busca de dados...")
+print("=" * 100)
+print("INICIANDO FETCH DE DADOS")
+print("=" * 100)
 
-# KPIs Principais
-col1, col2, col3, col4 = st.columns(4)
+try:
+    with st.spinner("🔍 Carregando telemetria..."):
+        print("Buscando metrics...")
+        metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
+        print(f"Metrics obtidas: {len(metrics_data) if metrics_data else 0}")
+        
+        print("Buscando traces...")
+        traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
+        print(f"Traces obtidos: {len(traces_data) if traces_data else 0}")
+        
+        print("Buscando logs...")
+        logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
+        print(f"Logs obtidos: {len(logs_data) if logs_data else 0}")
+    
+    st.success(f"✅ Dados carregados: {len(metrics_data)} métricas")
+except Exception as e:
+    print(f"ERRO NO FETCH: {e}")
+    import traceback
+    traceback.print_exc()
+    st.error(f"Erro ao buscar dados: {e}")
+    st.stop()
 
-with col1:
-    st.metric(
-        label="📊 Métricas",
-        value=len(metrics_data),
-        delta=f"+{len(metrics_data) % 10}" if metrics_data else "0"
+print("Dados carregados com sucesso, continuando...")
+st.write("✅ Fetch completo!")
+
+# TESTE ABSOLUTO - ANTES DAS TABS
+st.header("🧪 TESTE DE PLOTLY - Se você não vê um gráfico abaixo, há um problema")
+print("=" * 100)
+print("TESTE ABSOLUTO ANTES DAS TABS")
+print("=" * 100)
+
+try:
+    absolute_test_fig = go.Figure()
+    absolute_test_fig.add_trace(go.Scatter(
+        x=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        y=[1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+        mode='lines+markers',
+        name='y = x²',
+        line=dict(color='cyan', width=4),
+        marker=dict(size=10, color='yellow')
+    ))
+    absolute_test_fig.update_layout(
+        title="GRÁFICO DE TESTE - y = x²",
+        xaxis_title="X",
+        yaxis_title="Y",
+        template="plotly_dark",
+        height=500
     )
+    print("Figure criada com sucesso")
+    st.plotly_chart(absolute_test_fig, width='stretch')
+    print("st.plotly_chart executado")
+    st.success("✅ SUCESSO! Se você vê o gráfico acima, Plotly funciona!")
+except Exception as e:
+    print(f"ERRO NO TESTE ABSOLUTO: {e}")
+    import traceback
+    traceback.print_exc()
+    st.error(f"❌ ERRO: {e}")
 
-with col2:
-    st.metric(
-        label="🔗 Traces",
-        value=len(traces_data),
-        delta=f"+{len(traces_data) % 5}" if traces_data else "0"
-    )
-
-with col3:
-    st.metric(
-        label="📜 Logs",
-        value=len(logs_data),
-        delta=f"+{len(logs_data) % 8}" if logs_data else "0"
-    )
-
-with col4:
-    st.metric(
-        label="⚡ Latência Média",
-        value="12ms",
-        delta="-3ms"
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
+st.divider()
+st.write("---")
 
 # Tabs Principais
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
 with tab1:
+    print("=" * 80)
+    print("ENTRANDO NA TAB1 - MÉTRICAS")
+    print("=" * 80)
+    
+    # TESTE SIMPLES - Criar um gráfico de teste ANTES de tudo
+    st.write("🧪 TESTE: Criando gráfico simples de teste...")
+    print("Criando figure de teste...")
+    
+    try:
+        test_fig = go.Figure()
+        print("Figure criada")
+        test_fig.add_trace(go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode='lines+markers', name='Teste'))
+        print("Trace adicionado")
+        test_fig.update_layout(title="Gráfico de Teste", template="plotly_dark")
+        print("Layout atualizado")
+        st.plotly_chart(test_fig, width='stretch')
+        print("st.plotly_chart chamado")
+        st.write("✅ Se você vê um gráfico acima, Plotly está funcionando!")
+    except Exception as e:
+        print(f"ERRO AO CRIAR GRÁFICO DE TESTE: {e}")
+        st.error(f"Erro: {e}")
+    
+    st.divider()
+    
     if not metrics_data:
         st.warning("⚠️ Nenhuma métrica disponível no momento.")
     else:
-        df = pd.DataFrame(metrics_data)
+        # Parse payloadJson para extrair métricas detalhadas
+        flat_metrics = []
+        for item in metrics_data:
+            try:
+                payload = json.loads(item['payloadJson'])
+                for rm in payload.get('resourceMetrics', []):
+                    # Extrair atributos do resource
+                    service_name = 'unknown'
+                    device_id = None
+                    model_name = None
+                    
+                    for attr in rm.get('resource', {}).get('attributes', []):
+                        key = attr.get('key')
+                        value = attr.get('value', {}).get('stringValue', '')
+                        
+                        if key == 'service.name':
+                            service_name = value
+                        elif key == 'device.id':
+                            device_id = value
+                        elif key == 'model.name':
+                            model_name = value
+                    
+                    # Use device_id para IoT ou model_name para IA, fallback para service_name
+                    display_name = device_id or model_name or service_name
+                    
+                    for sm in rm.get('scopeMetrics', []):
+                        for metric in sm.get('metrics', []):
+                            metric_name = metric.get('name', 'unknown')
+                            unit = metric.get('unit', '')
+                            
+                            data_points = metric.get('gauge', {}).get('dataPoints', []) or \
+                                        metric.get('sum', {}).get('dataPoints', [])
+                            
+                            for dp in data_points:
+                                value = dp.get('asDouble', dp.get('asInt', 0))
+                                timestamp = pd.to_datetime(item['timestamp'])
+                                
+                                flat_metrics.append({
+                                    'metric_name': metric_name,
+                                    'service_name': display_name,  # Usando device_id ou model_name
+                                    'value': value,
+                                    'unit': unit,
+                                    'timestamp': timestamp,
+                                    'teamTag': item['teamTag']
+                                })
+            except Exception as e:
+                continue
         
-        if hide_system_metrics:
-            system_prefixes = ['jvm', 'process', 'system', 'tomcat', 'hikaricp', 'jdbc', 'disk', 'logback']
-            df = df[~df['metric_name'].str.startswith(tuple(system_prefixes))]
-        
-        if df.empty:
-            st.info("ℹ️ Desmarque 'Ocultar métricas JVM' para visualizar métricas de sistema")
+        if not flat_metrics:
+            st.warning("⚠️ Nenhuma métrica válida encontrada.")
         else:
-            # Gráfico principal
-            metric_names = df['metric_name'].unique()
-            selected_metric = st.selectbox("🎯 Selecione a Métrica", metric_names, key="metric_selector")
+            df = pd.DataFrame(flat_metrics)
+            st.success(f"✅ {len(df)} pontos de dados carregados")
             
-            if selected_metric:
-                filtered_df = df[df['metric_name'] == selected_metric].copy()
-                filtered_df['timestamp'] = pd.to_datetime(filtered_df['timestamp'])
-                
-                fig = go.Figure()
-                
-                for service in filtered_df['service_name'].unique():
-                    service_data = filtered_df[filtered_df['service_name'] == service]
-                    fig.add_trace(go.Scatter(
-                        x=service_data['timestamp'],
-                        y=service_data['value'],
-                        mode='lines+markers',
-                        name=service,
-                        line=dict(width=3),
-                        marker=dict(size=8)
-                    ))
-                
-                fig.update_layout(
-                    title=dict(
-                        text=f"📊 {selected_metric}",
-                        font=dict(size=24, color='#00d4ff', family='Arial Black')
-                    ),
-                    xaxis_title="Timestamp",
-                    yaxis_title="Valor",
-                    template="plotly_dark",
-                    hovermode='x unified',
-                    height=500,
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
+            # DEBUG: Show available metric names
+            st.write("🔍 DEBUG - Metric names in dataframe:", df['metric_name'].unique().tolist())
             
-            if show_raw_data:
-                with st.expander("🔍 Dados Brutos"):
-                    st.dataframe(df, use_container_width=True, height=400)
+            # Pegar role do session state
+            role = st.session_state.role
+            st.write(f"🔍 DEBUG - Current role: {role}")
+            st.write(f"🔍 DEBUG - Total rows in df: {len(df)}")
+            
+            # Visualizações específicas por Team
+            if role == "ROLE_IOT":
+                st.subheader("🌡️ Monitoramento de Sensores ESP32")
+                st.write("🔍 DEBUG - Entering IoT section")
+                
+                # Definir métricas IoT com ícones e cores
+                iot_metrics = {
+                    'environment.temperature': {'icon': '🌡️', 'title': 'Temperatura', 'unit': '°C', 'color': '#FF6B6B'},
+                    'environment.humidity': {'icon': '💧', 'title': 'Umidade', 'unit': '%', 'color': '#4ECDC4'},
+                    'environment.co2': {'icon': '☁️', 'title': 'CO2', 'unit': 'ppm', 'color': '#95E1D3'},
+                    'environment.luminosity': {'icon': '💡', 'title': 'Luminosidade', 'unit': 'lux', 'color': '#FFE66D'}
+                }
+                
+                for metric_key, config in iot_metrics.items():
+                    st.write(f"🔍 DEBUG - Checking metric: {metric_key}")
+                    metric_df = df[df['metric_name'] == metric_key]
+                    st.write(f"🔍 DEBUG - Found {len(metric_df)} rows for {metric_key}")
+                    
+                    if not metric_df.empty:
+                        st.markdown(f"### {config['icon']} {config['title']}")
+                        st.write(f"📊 {len(metric_df)} pontos | Dispositivos: {len(metric_df['service_name'].unique())}")
+                        st.write(f"🔍 DEBUG - Creating chart for {metric_key}...")
+                        
+                        fig = go.Figure()
+                        for service in metric_df['service_name'].unique():
+                            service_data = metric_df[metric_df['service_name'] == service].sort_values('timestamp')
+                            fig.add_trace(go.Scatter(
+                                x=service_data['timestamp'],
+                                y=service_data['value'],
+                                mode='lines+markers',
+                                name=service,
+                                line=dict(width=3, color=config['color']),
+                                marker=dict(size=8),
+                                hovertemplate=f'<b>{config["title"]}</b><br>' +
+                                            f'Valor: %{{y:.2f}} {config["unit"]}<br>' +
+                                            'Timestamp: %{x}<br>' +
+                                            '<extra></extra>'
+                            ))
+                        
+                        fig.update_layout(
+                            title=dict(text=f"{config['title']} em Tempo Real", font=dict(size=20, color='#00d4ff')),
+                            xaxis_title="Tempo",
+                            yaxis_title=f"{config['title']} ({config['unit']})",
+                            template="plotly_dark",
+                            hovermode='x unified',
+                            height=400,
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0.3)',
+                            showlegend=True,
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                        )
+                        
+                        st.write(f"🔍 DEBUG - Chart created, calling st.plotly_chart()...")
+                        st.plotly_chart(fig, width='stretch')
+                        st.write(f"🔍 DEBUG - Chart rendered successfully!")
+                        
+                        # Estatísticas rápidas
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Média", f"{metric_df['value'].mean():.2f} {config['unit']}")
+                        with col2:
+                            st.metric("Mínimo", f"{metric_df['value'].min():.2f} {config['unit']}")
+                        with col3:
+                            st.metric("Máximo", f"{metric_df['value'].max():.2f} {config['unit']}")
+                        
+                        st.markdown("---")
+            
+            elif role == "ROLE_IA":
+                st.subheader("🤖 Monitoramento de Modelos de IA")
+                
+                # Definir métricas IA
+                ia_metrics = {
+                    'ml.prediction.confidence': {'icon': '🎯', 'title': 'Confiança do Modelo', 'unit': '', 'color': '#A8E6CF'},
+                    'ml.model.drift': {'icon': '📊', 'title': 'Model Drift', 'unit': '', 'color': '#FFD3B6'},
+                    'ml.inference.duration': {'icon': '⚡', 'title': 'Tempo de Inferência', 'unit': 'ms', 'color': '#FFAAA5'}
+                }
+                
+                for metric_key, config in ia_metrics.items():
+                    metric_df = df[df['metric_name'] == metric_key]
+                    if not metric_df.empty:
+                        st.markdown(f"### {config['icon']} {config['title']}")
+                        
+                        fig = go.Figure()
+                        for service in metric_df['service_name'].unique():
+                            service_data = metric_df[metric_df['service_name'] == service].sort_values('timestamp')
+                            fig.add_trace(go.Scatter(
+                                x=service_data['timestamp'],
+                                y=service_data['value'],
+                                mode='lines+markers',
+                                name=service,
+                                line=dict(width=3, color=config['color']),
+                                marker=dict(size=8),
+                                hovertemplate=f'<b>{config["title"]}</b><br>' +
+                                            f'Valor: %{{y:.2f}} {config["unit"]}<br>' +
+                                            'Modelo: %{fullData.name}<br>' +
+                                            'Timestamp: %{x}<br>' +
+                                            '<extra></extra>'
+                            ))
+                        
+                        fig.update_layout(
+                            title=dict(text=f"{config['title']} - Modelos ML", font=dict(size=20, color='#00d4ff')),
+                            xaxis_title="Tempo",
+                            yaxis_title=f"{config['title']} ({config['unit']})",
+                            template="plotly_dark",
+                            hovermode='x unified',
+                            height=400,
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0.3)',
+                            showlegend=True,
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                        )
+                        
+                        st.plotly_chart(fig, width='stretch')
+                        
+                        # Estatísticas
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Média", f"{metric_df['value'].mean():.2f} {config['unit']}")
+                        with col2:
+                            st.metric("Mínimo", f"{metric_df['value'].min():.2f} {config['unit']}")
+                        with col3:
+                            st.metric("Máximo", f"{metric_df['value'].max():.2f} {config['unit']}")
+                        
+                        st.markdown("---")
+            
+            elif role == "ROLE_ADMIN":
+                st.subheader("👨‍💼 Visão Consolidada - Todos os Times")
+                
+                # Resumo geral
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    iot_count = len(df[df['teamTag'] == 'IOT'])
+                    st.metric("📊 Métricas IoT", iot_count)
+                with col2:
+                    ia_count = len(df[df['teamTag'] == 'IA'])
+                    st.metric("🤖 Métricas IA", ia_count)
+                with col3:
+                    st.metric("📈 Total", len(df))
+                
+                st.markdown("---")
+                
+                # Tabs para separar IoT e IA
+                tab_iot, tab_ia, tab_comparacao = st.tabs(["🔧 Sensores IoT", "🤖 Modelos IA", "📊 Comparação"])
+                
+                with tab_iot:
+                    iot_data = df[df['teamTag'] == 'IOT']
+                    if not iot_data.empty:
+                        # Métricas IoT individuais
+                        iot_metrics = {
+                            'environment.temperature': {'title': '🌡️ Temperatura', 'color': '#FF6B6B'},
+                            'environment.humidity': {'title': '💧 Umidade', 'color': '#4ECDC4'},
+                            'environment.co2': {'title': '☁️ CO2', 'color': '#95E1D3'},
+                            'environment.luminosity': {'title': '💡 Luminosidade', 'color': '#FFE66D'}
+                        }
+                        
+                        for metric_name, config in iot_metrics.items():
+                            metric_data = iot_data[iot_data['metric_name'] == metric_name]
+                            if not metric_data.empty:
+                                st.markdown(f"### {config['title']}")
+                                fig = go.Figure()
+                                for service in metric_data['service_name'].unique():
+                                    service_data = metric_data[metric_data['service_name'] == service].sort_values('timestamp')
+                                    fig.add_trace(go.Scatter(
+                                        x=service_data['timestamp'],
+                                        y=service_data['value'],
+                                        mode='lines',
+                                        name=service,
+                                        line=dict(width=2, color=config['color'])
+                                    ))
+                                
+                                fig.update_layout(
+                                    xaxis_title="Tempo",
+                                    yaxis_title="Valor",
+                                    template="plotly_dark",
+                                    height=350,
+                                    paper_bgcolor='rgba(0,0,0,0)',
+                                    plot_bgcolor='rgba(0,0,0,0.3)',
+                                    showlegend=True
+                                )
+                                st.plotly_chart(fig, width='stretch')
+                    else:
+                        st.info("Nenhuma métrica IoT disponível")
+                
+                with tab_ia:
+                    ia_data = df[df['teamTag'] == 'IA']
+                    if not ia_data.empty:
+                        # Métricas IA individuais
+                        ia_metrics = {
+                            'ml.prediction.confidence': {'title': '🎯 Confiança', 'color': '#A8E6CF'},
+                            'ml.model.drift': {'title': '📊 Drift', 'color': '#FFD3B6'},
+                            'ml.inference.duration': {'title': '⚡ Tempo Inferência', 'color': '#FFAAA5'}
+                        }
+                        
+                        for metric_name, config in ia_metrics.items():
+                            metric_data = ia_data[ia_data['metric_name'] == metric_name]
+                            if not metric_data.empty:
+                                st.markdown(f"### {config['title']}")
+                                fig = go.Figure()
+                                for service in metric_data['service_name'].unique():
+                                    service_data = metric_data[metric_data['service_name'] == service].sort_values('timestamp')
+                                    fig.add_trace(go.Scatter(
+                                        x=service_data['timestamp'],
+                                        y=service_data['value'],
+                                        mode='lines',
+                                        name=service,
+                                        line=dict(width=2, color=config['color'])
+                                    ))
+                                
+                                fig.update_layout(
+                                    xaxis_title="Tempo",
+                                    yaxis_title="Valor",
+                                    template="plotly_dark",
+                                    height=350,
+                                    paper_bgcolor='rgba(0,0,0,0)',
+                                    plot_bgcolor='rgba(0,0,0,0.3)',
+                                    showlegend=True
+                                )
+                                st.plotly_chart(fig, width='stretch')
+                    else:
+                        st.info("Nenhuma métrica IA disponível")
+                
+                with tab_comparacao:
+                    st.markdown("### 📊 Visão Geral do Sistema")
+                    
+                    # Gráfico de pizza - distribuição por team
+                    team_counts = df.groupby('teamTag').size()
+                    fig_pie = go.Figure(data=[go.Pie(
+                        labels=team_counts.index,
+                        values=team_counts.values,
+                        marker=dict(colors=['#FF6B6B', '#4ECDC4'])
+                    )])
+                    fig_pie.update_layout(
+                        title="Distribuição de Métricas por Time",
+                        template="plotly_dark",
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        height=400
+                    )
+                    st.plotly_chart(fig_pie, width='stretch')
+                    
+                    # Timeline de todas as métricas
+                    st.markdown("### ⏱️ Timeline Completa")
+                    fig_timeline = go.Figure()
+                    for team in df['teamTag'].unique():
+                        team_data = df[df['teamTag'] == team]
+                        fig_timeline.add_trace(go.Scatter(
+                            x=team_data['timestamp'],
+                            y=team_data['value'],
+                            mode='markers',
+                            name=team,
+                            marker=dict(size=5)
+                        ))
+                    
+                    fig_timeline.update_layout(
+                        title="Todas as Métricas ao Longo do Tempo",
+                        xaxis_title="Tempo",
+                        yaxis_title="Valor",
+                        template="plotly_dark",
+                        height=500,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0.3)'
+                    )
+                    st.plotly_chart(fig_timeline, width='stretch')
+            
 
 with tab2:
     if not traces_data:
         st.info("ℹ️ Nenhum trace capturado. Execute operações na aplicação.")
     else:
-        df_traces = pd.DataFrame(traces_data)
+        # Parse traces
+        parsed_traces = []
+        for item in traces_data:
+            try:
+                payload = json.loads(item['payloadJson'])
+                parsed_traces.append({
+                    'id': item['id'],
+                    'teamTag': item['teamTag'],
+                    'timestamp': item['timestamp'],
+                    'payload': payload
+                })
+            except:
+                continue
         
-        # Estatísticas de traces
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total de Spans", len(df_traces))
-        with col2:
-            if 'duration_ms' in df_traces.columns:
-                avg_duration = df_traces['duration_ms'].mean()
-                st.metric("Duração Média", f"{avg_duration:.2f}ms")
-        with col3:
-            unique_operations = df_traces['operation_name'].nunique() if 'operation_name' in df_traces.columns else 0
-            st.metric("Operações Únicas", unique_operations)
-        
-        # Timeline de traces
-        if 'timestamp' in df_traces.columns and 'duration_ms' in df_traces.columns:
-            df_traces['timestamp'] = pd.to_datetime(df_traces['timestamp'])
+        if not parsed_traces:
+            st.warning("⚠️ Nenhum trace válido encontrado.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total de Traces", len(parsed_traces))
+            with col2:
+                st.metric("IA Traces", len([t for t in parsed_traces if t['teamTag'] == 'IA']))
+            with col3:
+                st.metric("IOT Traces", len([t for t in parsed_traces if t['teamTag'] == 'IOT']))
             
-            fig = px.scatter(
-                df_traces,
-                x='timestamp',
-                y='duration_ms',
-                color='operation_name',
-                size='duration_ms',
-                hover_data=['trace_id', 'service_name', 'status_code'],
-                title="⏱️ Timeline de Traces"
-            )
+            # Mostrar tabela
+            st.subheader("🔍 Traces Capturados")
+            df_display = pd.DataFrame([
+                {
+                    'ID': t['id'],
+                    'Team': t['teamTag'],
+                    'Timestamp': t['timestamp'][:19]
+                }
+                for t in parsed_traces
+            ])
+            st.dataframe(df_display, use_container_width=True)
             
-            fig.update_layout(
-                template="plotly_dark",
-                height=400,
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Tabela de traces
-        st.dataframe(
-            df_traces[['timestamp', 'trace_id', 'service_name', 'operation_name', 'duration_ms', 'status_code']],
-            use_container_width=True,
-            height=400
-        )
+            if show_raw_data:
+                with st.expander("🔍 Dados Brutos - Traces JSON"):
+                    for t in parsed_traces[:5]:
+                        st.json(t['payload'])
 
 with tab3:
     if not logs_data:
         st.info("ℹ️ Nenhum log capturado. Verifique a configuração do logback.")
     else:
-        df_logs = pd.DataFrame(logs_data)
+        # Parse logs
+        parsed_logs = []
+        for item in logs_data:
+            try:
+                payload = json.loads(item['payloadJson'])
+                parsed_logs.append({
+                    'id': item['id'],
+                    'teamTag': item['teamTag'],
+                    'timestamp': item['timestamp'],
+                    'payload': payload
+                })
+            except:
+                continue
         
-        # Filtro de severidade
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            severity_filter = st.multiselect(
-                "Severidade",
-                options=df_logs['severity_text'].unique() if 'severity_text' in df_logs.columns else [],
-                default=df_logs['severity_text'].unique() if 'severity_text' in df_logs.columns else []
-            )
-        
-        if severity_filter:
-            df_logs = df_logs[df_logs['severity_text'].isin(severity_filter)]
-        
-        # Distribuição de logs por severidade
-        if 'severity_text' in df_logs.columns:
-            fig = px.pie(
-                df_logs,
-                names='severity_text',
-                title="📊 Distribuição de Logs por Severidade",
-                hole=0.4,
-                color_discrete_sequence=px.colors.sequential.RdBu
-            )
+        if not parsed_logs:
+            st.warning("⚠️ Nenhum log válido encontrado.")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total de Logs", len(parsed_logs))
+            with col2:
+                st.metric("IA Logs", len([l for l in parsed_logs if l['teamTag'] == 'IA']))
+            with col3:
+                st.metric("IOT Logs", len([l for l in parsed_logs if l['teamTag'] == 'IOT']))
             
-            fig.update_layout(
-                template="plotly_dark",
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-            )
+            # Mostrar tabela
+            st.subheader("📄 Logs Capturados")
+            df_display = pd.DataFrame([
+                {
+                    'ID': l['id'],
+                    'Team': l['teamTag'],
+                    'Timestamp': l['timestamp'][:19]
+                }
+                for l in parsed_logs
+            ])
+            st.dataframe(df_display, use_container_width=True)
             
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Tabela de logs
-        st.dataframe(
-            df_logs[['timestamp', 'severity_text', 'body', 'service_name']],
-            use_container_width=True,
-            height=400
-        )
+            if show_raw_data:
+                with st.expander("🔍 Dados Brutos - Logs JSON"):
+                    for l in parsed_logs[:5]:
+                        st.json(l['payload'])
 
 with tab4:
     st.markdown("### 🎯 Central de Alertas Cognitivos")

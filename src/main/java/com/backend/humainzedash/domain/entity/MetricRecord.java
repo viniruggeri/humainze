@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,8 @@ import java.time.Instant;
 public class MetricRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "metric_seq")
+    @SequenceGenerator(name = "metric_seq", sequenceName = "METRIC_SEQ", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)

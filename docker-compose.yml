@@ -90,6 +90,39 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  collector:
+    build:
+      context: .
+      dockerfile: Dockerfile.collector
+    container_name: humainze-collector
+    ports:
+      - "4318:4318"
+    networks:
+      - humainze-network
+    restart: unless-stopped
+    volumes:
+      - collector-data:/app/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:4318/api/metrics?role=ROLE_ADMIN",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   humainze-network:
     driver: bridge
+
+volumes:
+  collector-data:

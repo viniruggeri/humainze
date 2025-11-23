@@ -7,8 +7,8 @@ WORKDIR /app
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 
-# Baixa dependências (cache layer)
-RUN ./mvnw dependency:go-offline -B
+# Dá permissão e baixa dependências (cache layer)
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
 
 # Copia código fonte
 COPY src ./src
