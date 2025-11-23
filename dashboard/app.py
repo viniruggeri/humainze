@@ -388,13 +388,28 @@ with st.spinner("🔍 Carregando telemetria..."):
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
 with tab1:
+    print("=" * 80)
+    print("ENTRANDO NA TAB1 - MÉTRICAS")
+    print("=" * 80)
+    
     # TESTE SIMPLES - Criar um gráfico de teste ANTES de tudo
     st.write("🧪 TESTE: Criando gráfico simples de teste...")
-    test_fig = go.Figure()
-    test_fig.add_trace(go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode='lines+markers', name='Teste'))
-    test_fig.update_layout(title="Gráfico de Teste", template="plotly_dark")
-    st.plotly_chart(test_fig, use_container_width=True)
-    st.write("✅ Se você vê um gráfico acima, Plotly está funcionando!")
+    print("Criando figure de teste...")
+    
+    try:
+        test_fig = go.Figure()
+        print("Figure criada")
+        test_fig.add_trace(go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode='lines+markers', name='Teste'))
+        print("Trace adicionado")
+        test_fig.update_layout(title="Gráfico de Teste", template="plotly_dark")
+        print("Layout atualizado")
+        st.plotly_chart(test_fig, use_container_width=True)
+        print("st.plotly_chart chamado")
+        st.write("✅ Se você vê um gráfico acima, Plotly está funcionando!")
+    except Exception as e:
+        print(f"ERRO AO CRIAR GRÁFICO DE TESTE: {e}")
+        st.error(f"Erro: {e}")
+    
     st.divider()
     
     if not metrics_data:
