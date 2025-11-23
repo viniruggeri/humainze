@@ -1,5 +1,6 @@
 package com.backend.humainzedash.service;
 
+import com.backend.humainzedash.domain.entity.Role;
 import com.backend.humainzedash.domain.entity.Team;
 import com.backend.humainzedash.domain.entity.TeamRole;
 import com.backend.humainzedash.dto.auth.LoginRequest;
@@ -51,9 +52,18 @@ class AuthServiceTest {
         team.setTag("IA");
         team.setSecret("encoded");
 
+        Role role = new Role();
+        role.setId(1L);
+        role.setName("ROLE_IA");
+
+        TeamRole teamRole = new TeamRole();
+        teamRole.setId(1L);
+        teamRole.setTeam(team);
+        teamRole.setRole(role);
+
         when(teamRepository.findByTagIgnoreCase("IA")).thenReturn(Optional.of(team));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(teamRoleRepository.findByTeam(team)).thenReturn(List.of(new TeamRole()));
+        when(teamRoleRepository.findByTeam(team)).thenReturn(List.of(teamRole));
         when(jwtService.generateToken(any(JwtPayload.class))).thenReturn("token");
 
         LoginResponse response = authService.login(new LoginRequest("IA", "secret"));
@@ -68,4 +78,3 @@ class AuthServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
-

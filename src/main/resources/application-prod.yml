@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:oracle:thin:@oracle.fiap.com.br:1521/orcl
-    username: rm560593
-    password: 100225
+    username: ${DB_USERNAME:rm560593}
+    password: ${DB_PASSWORD}
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     hibernate:
@@ -10,23 +10,7 @@ spring:
     properties:
       hibernate:
         format_sql: false
-  # 📧 CONFIGURAÇÃO DE E-MAIL PARA PRODUÇÃO (GMAIL)
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${SMTP_USERNAME:vliraruggeri@gmail.com}
-    password: ${SMTP_PASSWORD:sua-senha-de-app-aqui}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-    test-connection: false
+        show_sql: false
 seed:
   enabled: true
 jwt:
@@ -34,12 +18,12 @@ jwt:
 otel:
   exporter:
     otlp:
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://signoz:4317}
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
   export:
     enabled: true
 logging:
   level:
     root: INFO
-    org.springframework.mail: DEBUG
-    com.backend.humainzedash: DEBUG
+    org.springframework.security: WARN
+    com.backend.humainzedash: INFO
 

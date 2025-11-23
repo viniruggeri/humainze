@@ -1,0 +1,46 @@
+DISRUPTIVE ARCHITECTURES: IOT, IOB & GENERATIVE IA
+Objetivo: Desenvolver uma solução IoT aplicada ao tema O Futuro do Trabalho, integrando sensores e/ou atuadores para coleta, 
+transmissão, processamento e visualização de dados em tempo real. A solução deve demonstrar utilidade prática em ambientes, 
+processos ou rotinas relacionados ao trabalho contemporâneo.
+REQUISITOS TÉCNICOS MÍNIMOS
+• Sistema IoT
+A solução deve incluir dispositivos capazes de coletar dados, executar ações ou interagir conforme necessidade do cenário 
+proposto.
+• Hardware
+Utilizar Arduino ou ESP32, em ambiente físico ou simulado no Wokwi.
+• Dashboard
+Implementar um painel para monitoramento e/ou controle dos dados e interações em tempo real.
+• Gateway
+Utilizar Node-RED, ThingSpeak ou plataforma equivalente para tratamento dos dados, comunicação e integração com o 
+dashboard.
+• Protocolos
+Comunicação deve utilizar MQTT (com mensagens no padrão JSON e tópicos exclusivos) e/ou HTTP.
+ENTREGA
+DISRUPTIVE ARCHITECTURES: IOT, IOB & GENERATIVE IA
+ENTREGÁVEIS
+1. Protótipo Funcional (até 50 pontos)
+• Demonstração do funcionamento da solução IoT.
+• Validação em simulação (Wokwi) ou em hardware real.
+• Aplicação alinhada ao tema O Futuro do Trabalho, com objetivo claro.
+2. Documentação (até 30 pontos)
+• Repositório no GitHub, contendo:
+• Descrição completa da solução e sua finalidade.
+• Código-fonte organizado e comentado.
+• README com orientações para configuração, execução e testes.
+• Registro e explicação dos fluxos configurados no gateway (ex.: Node-RED).
+ENTREGA
+DISRUPTIVE ARCHITECTURES: IOT, IOB & GENERATIVE IA
+3. Vídeo de Apresentação (até 20 pontos)
+• Duração máxima de 3 minutos.
+• Demonstração do funcionamento da solução.
+• Apresentação objetiva da proposta e dos benefícios esperados.
+ARQUIVO FINAL DE ENTREGA
+Enviar um arquivo .txt contendo:
+• Nome completo dos integrantes;
+• Link do repositório GitHub;
+• Link do vídeo no YouTube.
+OBSERVAÇÕES SOBRE INTEGRAÇÃO COM OUTRAS DISCIPLINAS
+Banco de Dados:
+Possibilidade de armazenamento estruturado dos dados coletados para histórico, análise e consulta.
+Front-End:
+Desenvolvimento do dashboard considerando organização visual, clareza das informações e interação do usuári

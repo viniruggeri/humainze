@@ -2,6 +2,7 @@ package com.backend.humainzedash.controller;
 
 import com.backend.humainzedash.dto.alert.AlertRequest;
 import com.backend.humainzedash.dto.alert.AlertResponse;
+import com.backend.humainzedash.security.ApiKeyService;
 import com.backend.humainzedash.service.AlertService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -35,10 +36,14 @@ class AlertControllerTest {
     @MockBean
     private AlertService alertService;
 
+    @MockBean
+    private ApiKeyService apiKeyService;
+
     @Test
     @WithMockUser(roles = "IA")
     void shouldCreateAlert() throws Exception {
-        AlertResponse response = new AlertResponse(1L, "IA", com.backend.humainzedash.domain.entity.Alert.AlertType.DRIFT, "msg", Instant.now(), false);
+        AlertResponse response = new AlertResponse(1L, "IA",
+                com.backend.humainzedash.domain.entity.Alert.AlertType.DRIFT, "msg", Instant.now(), false);
         Mockito.when(alertService.createAlert(Mockito.any(AlertRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/alerts")
@@ -50,7 +55,9 @@ class AlertControllerTest {
 
     @Test
     void shouldListAlerts() throws Exception {
-        Page<AlertResponse> page = new PageImpl<>(List.of(new AlertResponse(1L, "IA", com.backend.humainzedash.domain.entity.Alert.AlertType.DRIFT, "msg", Instant.now(), false)), PageRequest.of(0, 20), 1);
+        Page<AlertResponse> page = new PageImpl<>(List.of(new AlertResponse(1L, "IA",
+                com.backend.humainzedash.domain.entity.Alert.AlertType.DRIFT, "msg", Instant.now(), false)),
+                PageRequest.of(0, 20), 1);
         Mockito.when(alertService.listAlerts(Mockito.any(), Mockito.any())).thenReturn(page);
 
         mockMvc.perform(get("/alerts"))

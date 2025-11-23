@@ -2,6 +2,7 @@ package com.backend.humainzedash.controller;
 
 import com.backend.humainzedash.config.WebMvcTestWithoutSecurity;
 import com.backend.humainzedash.dto.telemetry.OtelIngestRequest;
+import com.backend.humainzedash.security.ApiKeyService;
 import com.backend.humainzedash.service.OTelService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,13 +25,17 @@ class OTelIngestControllerTest {
     @MockBean
     private OTelService oTelService;
 
+    @MockBean
+    private ApiKeyService apiKeyService;
+
     @Test
     void shouldAcceptMetricIngest() throws Exception {
         Mockito.doNothing().when(oTelService).storeMetrics(Mockito.any(OtelIngestRequest.class));
 
         mockMvc.perform(post("/otel/v1/metrics")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"teamTag\":\"IA\",\"timestamp\":\"" + Instant.now().toString() + "\",\"payloadJson\":\"{}\"}"))
+                .content("{\"teamTag\":\"IA\",\"timestamp\":\"" + Instant.now().toString()
+                        + "\",\"payloadJson\":\"{}\"}"))
                 .andExpect(status().isAccepted());
     }
 }

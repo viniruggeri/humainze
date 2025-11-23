@@ -4,6 +4,7 @@ import com.backend.humainzedash.config.WebMvcTestWithoutSecurity;
 import com.backend.humainzedash.dto.team.TeamRequest;
 import com.backend.humainzedash.dto.team.TeamResponse;
 import com.backend.humainzedash.dto.team.TeamRoleRequest;
+import com.backend.humainzedash.security.ApiKeyService;
 import com.backend.humainzedash.service.TeamService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,6 +28,9 @@ class TeamControllerTest {
     @MockBean
     private TeamService teamService;
 
+    @MockBean
+    private ApiKeyService apiKeyService;
+
     @Test
     void shouldCreateTeam() throws Exception {
         TeamResponse response = new TeamResponse(1L, "IA", "Time IA", List.of("ia@humanize.ai"), List.of("ROLE_IA"));
@@ -34,7 +38,8 @@ class TeamControllerTest {
 
         mockMvc.perform(post("/teams")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"tag\":\"IA\",\"secret\":\"secret123\",\"description\":\"Time IA\",\"emails\":[\"ia@humanize.ai\"]}"))
+                .content(
+                        "{\"tag\":\"IA\",\"secret\":\"secret123\",\"description\":\"Time IA\",\"emails\":[\"ia@humanize.ai\"]}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.tag").value("IA"));
@@ -44,8 +49,7 @@ class TeamControllerTest {
     void shouldListTeams() throws Exception {
         List<TeamResponse> teams = List.of(
                 new TeamResponse(1L, "IA", "Time IA", List.of(), List.of("ROLE_IA")),
-                new TeamResponse(2L, "IOT", "Time IOT", List.of(), List.of("ROLE_IOT"))
-        );
+                new TeamResponse(2L, "IOT", "Time IOT", List.of(), List.of("ROLE_IOT")));
         Mockito.when(teamService.listTeams()).thenReturn(teams);
 
         mockMvc.perform(get("/teams"))
@@ -86,4 +90,3 @@ class TeamControllerTest {
         Mockito.verify(teamService).removeRole(1L, 2L);
     }
 }
-

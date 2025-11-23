@@ -40,14 +40,9 @@ public class SecurityConfig {
                                 "/h2-console/**",
                                 "/dev/**")
                         .permitAll()
-
-                        // Observabilidade
                         .requestMatchers("/otel/v1/**").hasAnyRole("IA", "IOT", "JAVA")
-                        // Administrativo
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Alertas
                         .requestMatchers("/alerts/**").hasAnyRole("IA", "ADMIN")
-                        // Zero Trust
                         .anyRequest().denyAll())
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, ApiKeyAuthenticationFilter.class);
