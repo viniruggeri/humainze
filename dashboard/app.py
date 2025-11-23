@@ -173,7 +173,7 @@ st.markdown("""
 
 # Constantes
 JAVA_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8081")
-PYTHON_COLLECTOR_URL = "http://localhost:4318"
+PYTHON_COLLECTOR_URL = os.getenv("COLLECTOR_URL", "http://collector:4318")
 
 # ========== SESSÃO ==========
 if 'token' not in st.session_state:
@@ -218,7 +218,7 @@ def login(api_key):
         return None, None, None
 
 def fetch_secure_metrics(token, role):
-    """Busca métricas do coletor"""
+    """Busca métricas do coletor Python"""
     try:
         response = requests.get(
             f"{PYTHON_COLLECTOR_URL}/api/metrics",
@@ -229,8 +229,8 @@ def fetch_secure_metrics(token, role):
     except:
         return []
 
-def fetch_secure_traces(role):
-    """Busca traces do coletor"""
+def fetch_secure_traces(token, role):
+    """Busca traces do coletor Python"""
     try:
         response = requests.get(
             f"{PYTHON_COLLECTOR_URL}/api/traces",
@@ -241,8 +241,8 @@ def fetch_secure_traces(role):
     except:
         return []
 
-def fetch_secure_logs(role):
-    """Busca logs do coletor"""
+def fetch_secure_logs(token, role):
+    """Busca logs do coletor Python"""
     try:
         response = requests.get(
             f"{PYTHON_COLLECTOR_URL}/api/logs",
@@ -508,8 +508,8 @@ if alerts_count > 0:
 # Buscar dados
 with st.spinner("🔍 Carregando telemetria..."):
     metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
-    traces_data = fetch_secure_traces(st.session_state.role)
-    logs_data = fetch_secure_logs(st.session_state.role)
+    traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
+    logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
 
 # KPIs Principais
 col1, col2, col3, col4 = st.columns(4)
