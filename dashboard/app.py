@@ -615,10 +615,10 @@ with tab1:
                 
                 # Definir métricas IoT com ícones e cores
                 iot_metrics = {
-                    'temperature': {'icon': '🌡️', 'title': 'Temperatura', 'unit': '°C', 'color': '#FF6B6B'},
-                    'humidity': {'icon': '💧', 'title': 'Umidade', 'unit': '%', 'color': '#4ECDC4'},
-                    'co2': {'icon': '☁️', 'title': 'CO2', 'unit': 'ppm', 'color': '#95E1D3'},
-                    'luminosity': {'icon': '💡', 'title': 'Luminosidade', 'unit': 'lux', 'color': '#FFE66D'}
+                    'environment.temperature': {'icon': '🌡️', 'title': 'Temperatura', 'unit': '°C', 'color': '#FF6B6B'},
+                    'environment.humidity': {'icon': '💧', 'title': 'Umidade', 'unit': '%', 'color': '#4ECDC4'},
+                    'environment.co2': {'icon': '☁️', 'title': 'CO2', 'unit': 'ppm', 'color': '#95E1D3'},
+                    'environment.luminosity': {'icon': '💡', 'title': 'Luminosidade', 'unit': 'lux', 'color': '#FFE66D'}
                 }
                 
                 for metric_key, config in iot_metrics.items():
@@ -673,9 +673,9 @@ with tab1:
                 
                 # Definir métricas IA
                 ia_metrics = {
-                    'confidence': {'icon': '🎯', 'title': 'Confiança do Modelo', 'unit': '%', 'color': '#A8E6CF'},
-                    'drift': {'icon': '📊', 'title': 'Model Drift', 'unit': '', 'color': '#FFD3B6'},
-                    'inference': {'icon': '⚡', 'title': 'Tempo de Inferência', 'unit': 'ms', 'color': '#FFAAA5'}
+                    'ml.prediction.confidence': {'icon': '🎯', 'title': 'Confiança do Modelo', 'unit': '', 'color': '#A8E6CF'},
+                    'ml.model.drift': {'icon': '📊', 'title': 'Model Drift', 'unit': '', 'color': '#FFD3B6'},
+                    'ml.inference.duration': {'icon': '⚡', 'title': 'Tempo de Inferência', 'unit': 'ms', 'color': '#FFAAA5'}
                 }
                 
                 for metric_key, config in ia_metrics.items():
@@ -729,152 +729,140 @@ with tab1:
             elif role == "ROLE_ADMIN":
                 st.subheader("👨‍💼 Visão Consolidada - Todos os Times")
                 
+                # Resumo geral
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    iot_count = len(df[df['teamTag'] == 'IOT'])
+                    st.metric("📊 Métricas IoT", iot_count)
+                with col2:
+                    ia_count = len(df[df['teamTag'] == 'IA'])
+                    st.metric("🤖 Métricas IA", ia_count)
+                with col3:
+                    st.metric("📈 Total", len(df))
+                
+                st.markdown("---")
+                
                 # Tabs para separar IoT e IA
-                tab_iot, tab_ia = st.tabs(["🔧 Sensores IoT", "🤖 Modelos IA"])
+                tab_iot, tab_ia, tab_comparacao = st.tabs(["🔧 Sensores IoT", "🤖 Modelos IA", "📊 Comparação"])
                 
                 with tab_iot:
                     iot_data = df[df['teamTag'] == 'IOT']
                     if not iot_data.empty:
-                        st.markdown("### 🌡️ Sensores ESP32")
+                        # Métricas IoT individuais
+                        iot_metrics = {
+                            'environment.temperature': {'title': '🌡️ Temperatura', 'color': '#FF6B6B'},
+                            'environment.humidity': {'title': '💧 Umidade', 'color': '#4ECDC4'},
+                            'environment.co2': {'title': '☁️ CO2', 'color': '#95E1D3'},
+                            'environment.luminosity': {'title': '💡 Luminosidade', 'color': '#FFE66D'}
+                        }
                         
-                        # Gráfico combinado de todas as métricas IoT
-                        fig = go.Figure()
-                        for metric in iot_data['metric_name'].unique():
-                            metric_data = iot_data[iot_data['metric_name'] == metric].sort_values('timestamp')
-                            fig.add_trace(go.Scatter(
-                                x=metric_data['timestamp'],
-                                y=metric_data['value'],
-                                mode='lines',
-                                name=metric,
-                                line=dict(width=2)
-                            ))
-                        
-                        fig.update_layout(
-                            title="Todas as Métricas IoT",
-                            xaxis_title="Tempo",
-                            yaxis_title="Valor",
-                            template="plotly_dark",
-                            height=500,
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0.3)'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        for metric_name, config in iot_metrics.items():
+                            metric_data = iot_data[iot_data['metric_name'] == metric_name]
+                            if not metric_data.empty:
+                                st.markdown(f"### {config['title']}")
+                                fig = go.Figure()
+                                for service in metric_data['service_name'].unique():
+                                    service_data = metric_data[metric_data['service_name'] == service].sort_values('timestamp')
+                                    fig.add_trace(go.Scatter(
+                                        x=service_data['timestamp'],
+                                        y=service_data['value'],
+                                        mode='lines',
+                                        name=service,
+                                        line=dict(width=2, color=config['color'])
+                                    ))
+                                
+                                fig.update_layout(
+                                    xaxis_title="Tempo",
+                                    yaxis_title="Valor",
+                                    template="plotly_dark",
+                                    height=350,
+                                    paper_bgcolor='rgba(0,0,0,0)',
+                                    plot_bgcolor='rgba(0,0,0,0.3)',
+                                    showlegend=True
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
                     else:
                         st.info("Nenhuma métrica IoT disponível")
                 
                 with tab_ia:
                     ia_data = df[df['teamTag'] == 'IA']
                     if not ia_data.empty:
-                        st.markdown("### 🤖 Modelos de Machine Learning")
+                        # Métricas IA individuais
+                        ia_metrics = {
+                            'ml.prediction.confidence': {'title': '🎯 Confiança', 'color': '#A8E6CF'},
+                            'ml.model.drift': {'title': '📊 Drift', 'color': '#FFD3B6'},
+                            'ml.inference.duration': {'title': '⚡ Tempo Inferência', 'color': '#FFAAA5'}
+                        }
                         
-                        # Gráfico combinado de todas as métricas IA
-                        fig = go.Figure()
-                        for metric in ia_data['metric_name'].unique():
-                            metric_data = ia_data[ia_data['metric_name'] == metric].sort_values('timestamp')
-                            fig.add_trace(go.Scatter(
-                                x=metric_data['timestamp'],
-                                y=metric_data['value'],
-                                mode='lines',
-                                name=metric,
-                                line=dict(width=2)
-                            ))
-                        
-                        fig.update_layout(
-                            title="Todas as Métricas IA",
-                            xaxis_title="Tempo",
-                            yaxis_title="Valor",
-                            template="plotly_dark",
-                            height=500,
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0.3)'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        for metric_name, config in ia_metrics.items():
+                            metric_data = ia_data[ia_data['metric_name'] == metric_name]
+                            if not metric_data.empty:
+                                st.markdown(f"### {config['title']}")
+                                fig = go.Figure()
+                                for service in metric_data['service_name'].unique():
+                                    service_data = metric_data[metric_data['service_name'] == service].sort_values('timestamp')
+                                    fig.add_trace(go.Scatter(
+                                        x=service_data['timestamp'],
+                                        y=service_data['value'],
+                                        mode='lines',
+                                        name=service,
+                                        line=dict(width=2, color=config['color'])
+                                    ))
+                                
+                                fig.update_layout(
+                                    xaxis_title="Tempo",
+                                    yaxis_title="Valor",
+                                    template="plotly_dark",
+                                    height=350,
+                                    paper_bgcolor='rgba(0,0,0,0)',
+                                    plot_bgcolor='rgba(0,0,0,0.3)',
+                                    showlegend=True
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
                     else:
                         st.info("Nenhuma métrica IA disponível")
-                        fig = go.Figure()
-                        for service in metric_df['service_name'].unique():
-                            service_data = metric_df[metric_df['service_name'] == service]
-                            fig.add_trace(go.Scatter(
-                                x=service_data['timestamp'],
-                                y=service_data['value'],
-                                mode='lines+markers',
-                                name=service,
-                                line=dict(width=3),
-                                marker=dict(size=8)
-                            ))
-                        
-                        unit_text = metric_df['unit'].iloc[0] if not metric_df['unit'].empty else ''
-                        fig.update_layout(
-                            title=f"📡 {metric.upper()} - Leitura em Tempo Real",
-                            xaxis_title="Timestamp",
-                            yaxis_title=f"Valor ({unit_text})",
-                            template="plotly_dark",
-                            height=400,
-                            hovermode='x unified'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-            
-            elif role == "ROLE_IA":
-                st.subheader("🤖 Modelos de IA - Performance")
                 
-                # Gráficos de confidence, drift, inference_time
-                metrics_ia = ['confidence', 'drift', 'inference']
-                for metric in metrics_ia:
-                    metric_df = df[df['metric_name'].str.contains(metric, case=False, na=False)]
-                    if not metric_df.empty:
-                        fig = go.Figure()
-                        for service in metric_df['service_name'].unique():
-                            service_data = metric_df[metric_df['service_name'] == service]
-                            fig.add_trace(go.Scatter(
-                                x=service_data['timestamp'],
-                                y=service_data['value'],
-                                mode='lines+markers',
-                                name=service,
-                                line=dict(width=3),
-                                marker=dict(size=8),
-                                fill='tozeroy' if 'confidence' in metric else None
-                            ))
-                        
-                        unit_text = metric_df['unit'].iloc[0] if not metric_df['unit'].empty else ''
-                        fig.update_layout(
-                            title=f"🧠 {metric.upper()} - Análise de Modelo",
-                            xaxis_title="Timestamp",
-                            yaxis_title=f"Valor ({unit_text})",
-                            template="plotly_dark",
-                            height=400,
-                            hovermode='x unified'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-            
-            elif role == "ROLE_ADMIN":
-                st.subheader("📊 Visão Geral - Todas as Métricas")
-                
-                # Dashboard consolidado por Team
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    iot_df = df[df['teamTag'] == 'IOT']
-                    if not iot_df.empty:
-                        st.markdown("### 🌡️ IoT Sensors")
-                        for metric in ['temperature', 'humidity']:
-                            metric_df = iot_df[iot_df['metric_name'].str.contains(metric, case=False, na=False)]
-                            if not metric_df.empty:
-                                fig = px.line(metric_df, x='timestamp', y='value', 
-                                            color='service_name', title=f"{metric.upper()}")
-                                fig.update_layout(template="plotly_dark", height=300)
-                                st.plotly_chart(fig, use_container_width=True)
-                
-                with col2:
-                    ia_df = df[df['teamTag'] == 'IA']
-                    if not ia_df.empty:
-                        st.markdown("### 🤖 AI Models")
-                        for metric in ['confidence', 'drift']:
-                            metric_df = ia_df[ia_df['metric_name'].str.contains(metric, case=False, na=False)]
-                            if not metric_df.empty:
-                                fig = px.line(metric_df, x='timestamp', y='value',
-                                            color='service_name', title=f"{metric.upper()}")
-                                fig.update_layout(template="plotly_dark", height=300)
-                                st.plotly_chart(fig, use_container_width=True)
+                with tab_comparacao:
+                    st.markdown("### 📊 Visão Geral do Sistema")
+                    
+                    # Gráfico de pizza - distribuição por team
+                    team_counts = df.groupby('teamTag').size()
+                    fig_pie = go.Figure(data=[go.Pie(
+                        labels=team_counts.index,
+                        values=team_counts.values,
+                        marker=dict(colors=['#FF6B6B', '#4ECDC4'])
+                    )])
+                    fig_pie.update_layout(
+                        title="Distribuição de Métricas por Time",
+                        template="plotly_dark",
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        height=400
+                    )
+                    st.plotly_chart(fig_pie, use_container_width=True)
+                    
+                    # Timeline de todas as métricas
+                    st.markdown("### ⏱️ Timeline Completa")
+                    fig_timeline = go.Figure()
+                    for team in df['teamTag'].unique():
+                        team_data = df[df['teamTag'] == team]
+                        fig_timeline.add_trace(go.Scatter(
+                            x=team_data['timestamp'],
+                            y=team_data['value'],
+                            mode='markers',
+                            name=team,
+                            marker=dict(size=5)
+                        ))
+                    
+                    fig_timeline.update_layout(
+                        title="Todas as Métricas ao Longo do Tempo",
+                        xaxis_title="Tempo",
+                        yaxis_title="Valor",
+                        template="plotly_dark",
+                        height=500,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0.3)'
+                    )
+                    st.plotly_chart(fig_timeline, use_container_width=True)
             
             # Tabela resumida
             st.subheader("📋 Últimas Leituras")
