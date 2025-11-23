@@ -648,9 +648,11 @@ with tab1:
                             plot_bgcolor='rgba(0,0,0,0.3)',
                             showlegend=True,
                             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                                )
-                                
-                                st.plotly_chart(fig, width='stretch')                        # Estatísticas
+                        )
+                        
+                        st.plotly_chart(fig, width='stretch')
+                        
+                        # Estatísticas
                         col1, col2, col3 = st.columns(3)
                         with col1:
                             st.metric("Média", f"{metric_df['value'].mean():.2f} {config['unit']}")
