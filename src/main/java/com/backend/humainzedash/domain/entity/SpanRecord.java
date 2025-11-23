@@ -18,7 +18,8 @@ import java.time.Instant;
 public class SpanRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "span_seq")
+    @jakarta.persistence.SequenceGenerator(name = "span_seq", sequenceName = "SPAN_RECORDS_SEQ", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)

@@ -18,7 +18,8 @@ import java.time.Instant;
 public class MetricRecord {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "metric_seq")
+    @jakarta.persistence.SequenceGenerator(name = "metric_seq", sequenceName = "METRIC_RECORDS_SEQ", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
