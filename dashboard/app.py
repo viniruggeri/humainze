@@ -566,9 +566,13 @@ st.markdown("<br>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
 with tab1:
+    st.info(f"🔍 DEBUG: metrics_data length = {len(metrics_data) if metrics_data else 0}")
+    st.info(f"🔍 DEBUG: role = {st.session_state.role}")
+    
     if not metrics_data:
         st.warning("⚠️ Nenhuma métrica disponível no momento.")
     else:
+        st.success(f"✅ Recebidos {len(metrics_data)} registros do backend")
         # Parse payloadJson para extrair métricas detalhadas
         flat_metrics = []
         for item in metrics_data:
@@ -608,6 +612,9 @@ with tab1:
         else:
             df = pd.DataFrame(flat_metrics)
             st.success(f"✅ {len(df)} pontos de dados carregados")
+            
+            # Pegar role do session state
+            role = st.session_state.role
             
             # Debug: mostrar métricas únicas
             st.info(f"🔍 Métricas encontradas: {df['metric_name'].unique().tolist()[:10]}")
