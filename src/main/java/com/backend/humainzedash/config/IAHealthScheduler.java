@@ -11,10 +11,8 @@ public class IAHealthScheduler {
 
     private final IAHealthService iaHealthService;
 
-    // Executa a cada 5 minutos
     @Scheduled(fixedDelayString = "${ia.health.interval-ms:300000}")
     public void run() {
         iaHealthService.checkHealth();
     }
 }
-

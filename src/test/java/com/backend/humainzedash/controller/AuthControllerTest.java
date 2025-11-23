@@ -3,6 +3,7 @@ package com.backend.humainzedash.controller;
 import com.backend.humainzedash.config.WebMvcTestWithoutSecurity;
 import com.backend.humainzedash.dto.auth.LoginRequest;
 import com.backend.humainzedash.dto.auth.LoginResponse;
+import com.backend.humainzedash.security.ApiKeyService;
 import com.backend.humainzedash.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,6 +25,9 @@ class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
+    @MockBean
+    private ApiKeyService apiKeyService;
+
     @Test
     void shouldLoginTeam() throws Exception {
         LoginResponse response = new LoginResponse("token", "IA", java.util.List.of("ROLE_IA"));
@@ -41,4 +45,3 @@ class AuthControllerTest {
         Mockito.verify(authService).login(Mockito.any(LoginRequest.class));
     }
 }
-

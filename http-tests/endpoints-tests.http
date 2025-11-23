@@ -5,23 +5,23 @@ POST http://localhost:8081/auth/token
 X-API-KEY: chave-ia
 
 ### 2. Obter JWT usando API Key do time IOT
-POST http://localhost:8080/auth/token
+POST http://localhost:8081/auth/token
 X-API-KEY: chave-iot
 
 ### 3. Obter JWT usando API Key do time JAVA
-POST http://localhost:8080/auth/token
+POST http://localhost:8081/auth/token
 X-API-KEY: chave-java
 
 ### 4. Obter JWT usando API Key do time ADMIN
-POST http://localhost:8080/auth/token
+POST http://localhost:8081/auth/token
 X-API-KEY: chave-admin
 
 ### 5. Tentar com API Key inválida (deve retornar 401)
-POST http://localhost:8080/auth/token
+POST http://localhost:8081/auth/token
 X-API-KEY: chave-invalida
 
 ### 6. Testar acesso direto com API Key (sem JWT) - Time IA
-POST http://localhost:8080/otel/v1/metrics
+POST http://localhost:8081/otel/v1/metrics
 X-API-KEY: chave-ia
 Content-Type: application/json
 

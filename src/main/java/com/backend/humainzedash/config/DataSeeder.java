@@ -40,7 +40,6 @@ public class DataSeeder implements CommandLineRunner {
         seedAdminTeam();
         seedIaTeam();
         seedIotTeam();
-        System.out.println("✅ Data seed completed successfully");
     }
 
     private void seedRoles() {

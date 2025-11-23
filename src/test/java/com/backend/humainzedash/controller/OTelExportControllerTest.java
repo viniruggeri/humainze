@@ -2,6 +2,7 @@ package com.backend.humainzedash.controller;
 
 import com.backend.humainzedash.config.WebMvcTestWithoutSecurity;
 import com.backend.humainzedash.dto.telemetry.OtelExportResponse;
+import com.backend.humainzedash.security.ApiKeyService;
 import com.backend.humainzedash.service.OTelExportService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,6 +30,9 @@ class OTelExportControllerTest {
 
     @MockBean
     private OTelExportService oTelExportService;
+
+    @MockBean
+    private ApiKeyService apiKeyService;
 
     @Test
     void shouldExportMetricsForOwnTeam() throws Exception {
@@ -82,4 +86,3 @@ class OTelExportControllerTest {
                 .andExpect(jsonPath("$.content[0].teamTag").value("IOT"));
     }
 }
-

@@ -1,0 +1,130 @@
+{
+  "version": 1,
+  "author": "FIAP 2TDSPR - RM560593, RM560431, RM560039",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp32",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht22",
+      "top": -120,
+      "left": 100,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-analog-sensor",
+      "id": "mq135",
+      "top": 50,
+      "left": 300,
+      "attrs": {
+        "name": "MQ-135 (CO2)"
+      }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr",
+      "top": 150,
+      "left": 300,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [
+      "esp32:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp32:RX",
+      "$serialMonitor:TX",
+      "",
+      [ "v0" ]
+    ],
+    [
+      "dht22:VCC",
+      "esp32:3V3",
+      "red",
+      [
+        "h0"
+      ]
+    ],
+    [
+      "dht22:GND",
+      "esp32:GND.1",
+      "black",
+      [
+        "h0"
+      ]
+    ],
+    [
+      "dht22:SDA",
+      "esp32:D4",
+      "green",
+      [
+        "h0"
+      ]
+    ],
+    [
+      "mq135:VCC",
+      "esp32:3V3",
+      "red",
+      [
+        "h20",
+        "v100"
+      ]
+    ],
+    [
+      "mq135:GND",
+      "esp32:GND.2",
+      "black",
+      [
+        "h20",
+        "v120"
+      ]
+    ],
+    [
+      "mq135:AO",
+      "esp32:D34",
+      "orange",
+      [
+        "h10",
+        "v80"
+      ]
+    ],
+    [
+      "ldr:VCC",
+      "esp32:3V3",
+      "red",
+      [
+        "h30",
+        "v150"
+      ]
+    ],
+    [
+      "ldr:GND",
+      "esp32:GND.2",
+      "black",
+      [
+        "h30",
+        "v170"
+      ]
+    ],
+    [
+      "ldr:AO",
+      "esp32:D35",
+      "yellow",
+      [
+        "h15",
+        "v130"
+      ]
+    ]
+  ],
+  "dependencies": {}
+}

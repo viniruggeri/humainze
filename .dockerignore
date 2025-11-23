@@ -1,0 +1,60 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Test
+test-results/
+coverage/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Docs
+docs/
+*.md
+!README.md
+
+# Scripts
+*.sh
+*.ps1
+*.bat
+
+# SigNoz
+signoz/
+
+# HTTP Tests
+http-tests/
+
+# Python cache (apenas para Dockerfile.dashboard)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/

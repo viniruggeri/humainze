@@ -2,7 +2,7 @@ server:
   port: 8081
 spring:
   active:
-    profiles: dev
+    profiles: prod
   application:
     name: humainze-dash
   jpa:
@@ -44,9 +44,9 @@ management:
       export:
         enabled: true
         url: http://localhost:4318/v1/metrics
-        step: 30s  # Aumentado de 10s para 30s
+        step: 30s
         connect-timeout: 5s
-        read-timeout: 30s  # Timeout aumentado para 30s
+        read-timeout: 30s
   endpoints:
     web:
       exposure:

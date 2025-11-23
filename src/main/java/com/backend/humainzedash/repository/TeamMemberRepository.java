@@ -1,7 +1,9 @@
 package com.backend.humainzedash.repository;
 
-// Este repositório foi desativado porque TeamMember não é mais uma entidade JPA.
-// Se você quiser reintroduzir TeamMember como entidade, defina o @Id na entidade
-// e então restaure esta interface estendendo JpaRepository.
+/**
+ * This repository was deactivated because TeamMember is no longer a JPA entity.
+ * If you want to reintroduce TeamMember as an entity, define @Id in the entity
+ * and then restore this interface extending JpaRepository.
+ */
 public interface TeamMemberRepository {
 }
