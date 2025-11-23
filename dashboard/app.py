@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import json
 import time
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
@@ -171,7 +172,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Constantes
-JAVA_BACKEND_URL = "http://localhost:8081"
+JAVA_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8081")
 PYTHON_COLLECTOR_URL = "http://localhost:4318"
 
 # ========== SESSÃO ==========
