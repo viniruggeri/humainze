@@ -221,18 +221,33 @@ def fetch_secure_metrics(token, role):
     """Busca métricas do backend Java"""
     try:
         headers = {"Authorization": f"Bearer {token}"}
+        url = f"{JAVA_BACKEND_URL}/export/metrics"
+        params = {"page": 0, "size": 500}
+        
+        print(f"🔍 DEBUG: Fetching metrics from {url} with params {params}")
+        print(f"🔍 DEBUG: Token prefix: {token[:20] if token else 'None'}...")
+        
         response = requests.get(
-            f"{JAVA_BACKEND_URL}/export/metrics",
+            url,
             headers=headers,
-            params={"page": 0, "size": 500},
+            params=params,
             timeout=10
         )
+        
+        print(f"🔍 DEBUG: Response status: {response.status_code}")
+        
         if response.status_code == 200:
             data = response.json()
-            return data.get("content", [])
-        return []
+            content = data.get("content", [])
+            print(f"🔍 DEBUG: Received {len(content)} metrics from backend")
+            return content
+        else:
+            print(f"❌ DEBUG: Error response: {response.text[:200]}")
+            return []
     except Exception as e:
-        print(f"Erro ao buscar métricas: {e}")
+        print(f"❌ Erro ao buscar métricas: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 def fetch_secure_traces(token, role):
