@@ -379,100 +379,15 @@ if alerts_count > 0:
                 st.info("Nenhum alerta não resolvido encontrado.")
 
 # Buscar dados
-st.write("🔄 Iniciando busca de dados...")
-print("=" * 100)
-print("INICIANDO FETCH DE DADOS")
-print("=" * 100)
-
-try:
-    with st.spinner("🔍 Carregando telemetria..."):
-        print("Buscando metrics...")
-        metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
-        print(f"Metrics obtidas: {len(metrics_data) if metrics_data else 0}")
-        
-        print("Buscando traces...")
-        traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
-        print(f"Traces obtidos: {len(traces_data) if traces_data else 0}")
-        
-        print("Buscando logs...")
-        logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
-        print(f"Logs obtidos: {len(logs_data) if logs_data else 0}")
-    
-    st.success(f"✅ Dados carregados: {len(metrics_data)} métricas")
-except Exception as e:
-    print(f"ERRO NO FETCH: {e}")
-    import traceback
-    traceback.print_exc()
-    st.error(f"Erro ao buscar dados: {e}")
-    st.stop()
-
-print("Dados carregados com sucesso, continuando...")
-st.write("✅ Fetch completo!")
-
-# TESTE ABSOLUTO - ANTES DAS TABS
-st.header("🧪 TESTE DE PLOTLY - Se você não vê um gráfico abaixo, há um problema")
-print("=" * 100)
-print("TESTE ABSOLUTO ANTES DAS TABS")
-print("=" * 100)
-
-try:
-    absolute_test_fig = go.Figure()
-    absolute_test_fig.add_trace(go.Scatter(
-        x=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        y=[1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
-        mode='lines+markers',
-        name='y = x²',
-        line=dict(color='cyan', width=4),
-        marker=dict(size=10, color='yellow')
-    ))
-    absolute_test_fig.update_layout(
-        title="GRÁFICO DE TESTE - y = x²",
-        xaxis_title="X",
-        yaxis_title="Y",
-        template="plotly_dark",
-        height=500
-    )
-    print("Figure criada com sucesso")
-    st.plotly_chart(absolute_test_fig, width='stretch')
-    print("st.plotly_chart executado")
-    st.success("✅ SUCESSO! Se você vê o gráfico acima, Plotly funciona!")
-except Exception as e:
-    print(f"ERRO NO TESTE ABSOLUTO: {e}")
-    import traceback
-    traceback.print_exc()
-    st.error(f"❌ ERRO: {e}")
-
-st.divider()
-st.write("---")
+with st.spinner("🔍 Carregando telemetria..."):
+    metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
+    traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
+    logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
 
 # Tabs Principais
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Métricas", "🔗 Traces & Spans", "📜 Logs", "🎯 Alertas"])
 
 with tab1:
-    print("=" * 80)
-    print("ENTRANDO NA TAB1 - MÉTRICAS")
-    print("=" * 80)
-    
-    # TESTE SIMPLES - Criar um gráfico de teste ANTES de tudo
-    st.write("🧪 TESTE: Criando gráfico simples de teste...")
-    print("Criando figure de teste...")
-    
-    try:
-        test_fig = go.Figure()
-        print("Figure criada")
-        test_fig.add_trace(go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode='lines+markers', name='Teste'))
-        print("Trace adicionado")
-        test_fig.update_layout(title="Gráfico de Teste", template="plotly_dark")
-        print("Layout atualizado")
-        st.plotly_chart(test_fig, width='stretch')
-        print("st.plotly_chart chamado")
-        st.write("✅ Se você vê um gráfico acima, Plotly está funcionando!")
-    except Exception as e:
-        print(f"ERRO AO CRIAR GRÁFICO DE TESTE: {e}")
-        st.error(f"Erro: {e}")
-    
-    st.divider()
-    
     if not metrics_data:
         st.warning("⚠️ Nenhuma métrica disponível no momento.")
     else:
@@ -528,20 +443,14 @@ with tab1:
             st.warning("⚠️ Nenhuma métrica válida encontrada.")
         else:
             df = pd.DataFrame(flat_metrics)
-            st.success(f"✅ {len(df)} pontos de dados carregados")
-            
-            # DEBUG: Show available metric names
-            st.write("🔍 DEBUG - Metric names in dataframe:", df['metric_name'].unique().tolist())
+            st.success(f"✅ {len(df)} métricas carregadas")
             
             # Pegar role do session state
             role = st.session_state.role
-            st.write(f"🔍 DEBUG - Current role: {role}")
-            st.write(f"🔍 DEBUG - Total rows in df: {len(df)}")
             
             # Visualizações específicas por Team
             if role == "ROLE_IOT":
                 st.subheader("🌡️ Monitoramento de Sensores ESP32")
-                st.write("🔍 DEBUG - Entering IoT section")
                 
                 # Definir métricas IoT com ícones e cores
                 iot_metrics = {
@@ -552,14 +461,10 @@ with tab1:
                 }
                 
                 for metric_key, config in iot_metrics.items():
-                    st.write(f"🔍 DEBUG - Checking metric: {metric_key}")
                     metric_df = df[df['metric_name'] == metric_key]
-                    st.write(f"🔍 DEBUG - Found {len(metric_df)} rows for {metric_key}")
                     
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
-                        st.write(f"📊 {len(metric_df)} pontos | Dispositivos: {len(metric_df['service_name'].unique())}")
-                        st.write(f"🔍 DEBUG - Creating chart for {metric_key}...")
                         
                         fig = go.Figure()
                         for service in metric_df['service_name'].unique():
@@ -590,9 +495,7 @@ with tab1:
                             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                         )
                         
-                        st.write(f"🔍 DEBUG - Chart created, calling st.plotly_chart()...")
                         st.plotly_chart(fig, width='stretch')
-                        st.write(f"🔍 DEBUG - Chart rendered successfully!")
                         
                         # Estatísticas rápidas
                         col1, col2, col3 = st.columns(3)
