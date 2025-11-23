@@ -379,10 +379,35 @@ if alerts_count > 0:
                 st.info("Nenhum alerta não resolvido encontrado.")
 
 # Buscar dados
-with st.spinner("🔍 Carregando telemetria..."):
-    metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
-    traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
-    logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
+st.write("🔄 Iniciando busca de dados...")
+print("=" * 100)
+print("INICIANDO FETCH DE DADOS")
+print("=" * 100)
+
+try:
+    with st.spinner("🔍 Carregando telemetria..."):
+        print("Buscando metrics...")
+        metrics_data = fetch_secure_metrics(st.session_state.token, st.session_state.role)
+        print(f"Metrics obtidas: {len(metrics_data) if metrics_data else 0}")
+        
+        print("Buscando traces...")
+        traces_data = fetch_secure_traces(st.session_state.token, st.session_state.role)
+        print(f"Traces obtidos: {len(traces_data) if traces_data else 0}")
+        
+        print("Buscando logs...")
+        logs_data = fetch_secure_logs(st.session_state.token, st.session_state.role)
+        print(f"Logs obtidos: {len(logs_data) if logs_data else 0}")
+    
+    st.success(f"✅ Dados carregados: {len(metrics_data)} métricas")
+except Exception as e:
+    print(f"ERRO NO FETCH: {e}")
+    import traceback
+    traceback.print_exc()
+    st.error(f"Erro ao buscar dados: {e}")
+    st.stop()
+
+print("Dados carregados com sucesso, continuando...")
+st.write("✅ Fetch completo!")
 
 # TESTE ABSOLUTO - ANTES DAS TABS
 st.header("🧪 TESTE DE PLOTLY - Se você não vê um gráfico abaixo, há um problema")
