@@ -403,7 +403,7 @@ with tab1:
         print("Trace adicionado")
         test_fig.update_layout(title="Gráfico de Teste", template="plotly_dark")
         print("Layout atualizado")
-        st.plotly_chart(test_fig, use_container_width=True)
+        st.plotly_chart(test_fig, width='stretch')
         print("st.plotly_chart chamado")
         st.write("✅ Se você vê um gráfico acima, Plotly está funcionando!")
     except Exception as e:
@@ -530,7 +530,7 @@ with tab1:
                         )
                         
                         st.write(f"🔍 DEBUG - Chart created, calling st.plotly_chart()...")
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
                         st.write(f"🔍 DEBUG - Chart rendered successfully!")
                         
                         # Estatísticas rápidas
@@ -587,11 +587,9 @@ with tab1:
                             plot_bgcolor='rgba(0,0,0,0.3)',
                             showlegend=True,
                             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Estatísticas
+                                )
+                                
+                                st.plotly_chart(fig, width='stretch')                        # Estatísticas
                         col1, col2, col3 = st.columns(3)
                         with col1:
                             st.metric("Média", f"{metric_df['value'].mean():.2f} {config['unit']}")
@@ -714,7 +712,7 @@ with tab1:
                         paper_bgcolor='rgba(0,0,0,0)',
                         height=400
                     )
-                    st.plotly_chart(fig_pie, use_container_width=True)
+                    st.plotly_chart(fig_pie, width='stretch')
                     
                     # Timeline de todas as métricas
                     st.markdown("### ⏱️ Timeline Completa")
@@ -738,7 +736,7 @@ with tab1:
                         paper_bgcolor='rgba(0,0,0,0)',
                         plot_bgcolor='rgba(0,0,0,0.3)'
                     )
-                    st.plotly_chart(fig_timeline, use_container_width=True)
+                    st.plotly_chart(fig_timeline, width='stretch')
             
 
 with tab2:
