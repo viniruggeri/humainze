@@ -609,6 +609,11 @@ with tab1:
             df = pd.DataFrame(flat_metrics)
             st.success(f"✅ {len(df)} pontos de dados carregados")
             
+            # Debug: mostrar métricas únicas
+            st.info(f"🔍 Métricas encontradas: {df['metric_name'].unique().tolist()[:10]}")
+            st.info(f"🔍 Role atual: {role}")
+            st.info(f"🔍 Teams no DataFrame: {df['teamTag'].unique().tolist()}")
+            
             # Visualizações específicas por Team
             if role == "ROLE_IOT":
                 st.subheader("🌡️ Monitoramento de Sensores ESP32")
@@ -623,6 +628,7 @@ with tab1:
                 
                 for metric_key, config in iot_metrics.items():
                     metric_df = df[df['metric_name'].str.contains(metric_key, case=False, na=False)]
+                    st.info(f"🔍 {metric_key}: {len(metric_df)} pontos encontrados")
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
                         
