@@ -717,7 +717,7 @@ with tab1:
                                     plot_bgcolor='rgba(0,0,0,0.3)',
                                     showlegend=True
                                 )
-                                st.plotly_chart(fig, use_container_width=True)
+                                st.plotly_chart(fig, width='stretch')
                     else:
                         st.info("Nenhuma métrica IoT disponível")
                 
@@ -755,7 +755,7 @@ with tab1:
                                     plot_bgcolor='rgba(0,0,0,0.3)',
                                     showlegend=True
                                 )
-                                st.plotly_chart(fig, use_container_width=True)
+                                st.plotly_chart(fig, width='stretch')
                     else:
                         st.info("Nenhuma métrica IA disponível")
                 
