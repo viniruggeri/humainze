@@ -183,8 +183,9 @@ SPRING_JPA_SHOW_SQL=false
 # Seed Data
 SEED_ENABLED=true
 
-# OpenTelemetry (opcional - se tiver SigNoz)
-OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz:4318
+# Dashboard Streamlit
+DASHBOARD_URL=http://localhost:8501
+STREAMLIT_PORT=8501
 OTEL_SERVICE_NAME=humainze-backend
 
 # Dashboard

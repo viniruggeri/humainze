@@ -11,7 +11,7 @@ Este guia descreve como dispositivos IoT (Arduino, ESP32, Raspberry Pi, etc.) en
 
 ### Por que Backend Java?
 
-✅ **Open-source completo** - sem dependências de SigNoz, Grafana, Datadog  
+✅ **Open-source completo** - solução sem dependências externas  
 ✅ **Persistência em banco SQL** - OracleDB (prod) ou H2 (dev)  
 ✅ **APIs REST com paginação** - `/export/metrics`, `/export/traces`, `/export/logs`  
 ✅ **Dashboard customizável** - Streamlit + Plotly, fácil de modificar  
@@ -556,22 +556,21 @@ get_latest_metrics()
 
 ---
 
-## 🔍 Visualizar no SigNoz
+## 📊 Visualizar no Dashboard
 
-### URL
+### Acesso ao Dashboard Streamlit
 
-```
-http://localhost:3301/dashboard
-```
+**URL Local**: `http://localhost:8501`  
+**URL Azure**: `http://172.161.94.218:8501`
 
-### Criar Dashboard
+### Tab "📡 Métricas IoT"
 
-1. **Clique em** "+ Dashboard"
-2. **Adicione widget** com:
-   - **Tipo**: Time Series
-   - **Métrica**: `temperature`, `humidity`, `co2_ppm`
-   - **Filtro**: `team="IOT"`
-3. **Salve** e configure refresh cada 5s
+1. **Selecione período**: última hora, 6h, 24h, 7 dias
+2. **Visualize gráficos**:
+   - Time Series: Temperatura, Umidade, CO2
+   - Gauge: Valores atuais
+   - Bar Chart: Comparação entre sensores
+3. **Auto-refresh**: atualização automática a cada 5 segundos
 
 ### Query Exemplo
 
@@ -634,7 +633,7 @@ curl http://localhost:8080/export/metrics?teamTag=IOT&page=0&size=10 \
 - [ ] Sensores testados localmente
 - [ ] Primeira métrica enviada com sucesso
 - [ ] Backend respondendo com HTTP 200/201
-- [ ] Métricas aparecendo no SigNoz
+- [ ] Métricas aparecendo no dashboard (porta 8501)
 - [ ] Dashboard criado e configurado
 - [ ] Auto-inicialização configurada (systemd/cron)
 - [ ] Alertas de offline configurados
@@ -662,7 +661,7 @@ curl http://localhost:8080/export/metrics?teamTag=IOT&page=0&size=10 \
 | `Connection timeout` | Verifique IP/porta do backend |
 | `Invalid JSON` | Verifique formato do `payloadJson` |
 | Sensor não responde | Verifique pinos, bibliotecas, alimentação |
-| Métricas não no SigNoz | Verifique endpoint OTEL em backend |
+| Dashboard não carrega | Verifique se backend está rodando (porta 8080) |
 | WiFi desconecta | Adicione lógica de reconexão automática |
 
 ---

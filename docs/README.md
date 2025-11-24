@@ -10,7 +10,7 @@ Humainze é uma **plataforma completa de observabilidade open-source** que:
 - 📊 Persiste métricas/traces/logs em banco relacional (Oracle/H2)
 - 📈 Dashboard Streamlit customizado com gráficos Plotly
 - 🚨 Sistema de alertas cognitivos em tempo real
-- ✅ **100% open-source** - sem dependências de SigNoz, Grafana ou Datadog
+- ✅ **100% open-source** - solução completa sem dependências externas
 
 ## 📖 Documentação Disponível
 
@@ -22,7 +22,7 @@ Como integrar módulos de IA Python com o backend:
 - Exemplos de código Python
 - APIs de predição e treinamento
 - Detecção de drift
-- Queries SigNoz
+- Visualização no Dashboard Streamlit
 
 ### [🔌 Guia de Integração - IoT](INTEGRATION_GUIDE_IOT.md)
 Como conectar sensores e dispositivos IoT:

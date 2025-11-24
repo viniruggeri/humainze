@@ -10,7 +10,7 @@ Como integrar módulos de IA Python com o backend:
 - Código Python para envio de dados
 - APIs de predição e treinamento
 - Detecção de drift
-- Queries SigNoz
+- Visualização no dashboard
 
 ### [🔌 Guia de Integração - IoT](INTEGRATION_GUIDE_IOT.md)
 Como conectar sensores e dispositivos IoT:
@@ -31,11 +31,11 @@ Payloads JSON prontos para usar:
 - Traces distribuídos
 - Logs estruturados
 
-### [📊 Visualização com SigNoz](SIGNOZ_VISUALIZATION.md)
-Como usar SigNoz para observabilidade:
-- Dashboard de métricas
-- Tracing distribuído
-- Queries customizadas
+### [📊 Dashboard Streamlit](DASHBOARD_GUIDE.md)
+Como usar o dashboard de visualização:
+- Gráficos interativos (porta 8501)
+- Métricas em tempo real
+- Sistema de alertas
 
 ### [🚨 Sistema de Alertas](ALERTS_SYSTEM.md)
 Documentação completa do sistema de alertas cognitivos:
@@ -74,7 +74,6 @@ Contém:
 - ✅ 14+ exemplos de métricas IA prontos para usar
 - ✅ 7+ exemplos de alertas com GPT-4
 - ✅ Comandos cURL completos
-- ✅ Queries SQL para SigNoz
 - ✅ Template genérico para qualquer métrica
 
 **Use este documento quando:**
@@ -84,22 +83,22 @@ Contém:
 
 ---
 
-### 4. **SIGNOZ_VISUALIZATION.md**
-**Como visualizar métricas no SigNoz**
+### 4. **DASHBOARD_GUIDE.md**
+**Como visualizar métricas no Dashboard Streamlit**
 
 Contém:
-- ✅ Instalação do SigNoz com Docker Compose
-- ✅ Configuração do backend para exportar OTEL
-- ✅ Passo-a-passo: criar dashboard IoT
-- ✅ Passo-a-passo: criar dashboard IA
-- ✅ Configurar alertas (Slack, Email, PagerDuty)
-- ✅ 5+ queries SQL recomendadas
+- ✅ Instalação e configuração (porta 8501)
+- ✅ Gráficos interativos com Plotly
+- ✅ Métricas em tempo real (IoT e IA)
+- ✅ Sistema de alertas integrado
+- ✅ Filtros e paginação
+- ✅ Auto-refresh
 - ✅ Troubleshooting
 
 **Dashboards abordados:**
 - IoT: Temperatura, Umidade, CO2, Luminosidade
 - IA: Acurácia, Drift, Latência, Métricas de classificação
-- Alertas: Configuração e integração com Slack/Email
+- Alertas: Banner de notificações e histórico completo
 
 ---
 
@@ -186,9 +185,9 @@ curl -X POST http://localhost:8080/otel/v1/metrics \
   }'
 ```
 
-#### 3. Visualizar no SigNoz
+#### 3. Visualizar no Dashboard
 ```
-http://localhost:3301/dashboard
+http://localhost:8501  (ou http://172.161.94.218:8501 em Azure)
 ```
 
 ---
@@ -201,7 +200,7 @@ humainze-dash/
 │   ├── INTEGRATION_GUIDE_IA.md        ← Team IA lê isso
 │   ├── INTEGRATION_GUIDE_IOT.md       ← Team IoT lê isso
 │   ├── PAYLOAD_EXAMPLES.md            ← Exemplos prontos
-│   ├── SIGNOZ_VISUALIZATION.md        ← Dashboard
+│   ├── DASHBOARD_GUIDE.md             ← Dashboard Streamlit
 │   ├── INDEX.md                       ← Você está aqui
 │   └── README.md                      ← Visão geral do projeto
 ├── http-tests/
@@ -312,15 +311,15 @@ POST /alerts
 
 - [Spring Boot 3 Docs](https://spring.io/projects/spring-boot)
 - [OpenTelemetry Docs](https://opentelemetry.io/docs/)
-- [SigNoz Docs](https://signoz.io/docs/)
+- [Streamlit Docs](https://docs.streamlit.io/)
+- [Plotly Docs](https://plotly.com/python/)
 - [ArduinoJson](https://arduinojson.org/)
 - [Requests Python](https://docs.python-requests.org/)
 
 ### Repositórios
 
-- Backend: https://github.com/humanize/humainze-dash
-- IA Service: https://github.com/humanize/humainze-ia
-- IoT Firmware: https://github.com/humanize/humainze-iot
+- Backend Java: https://github.com/viniruggeri/humainze
+- IoT ESP32: https://github.com/viniruggeri/humainze-iot
 
 ### Contatos
 
@@ -356,16 +355,16 @@ client.send_metric("temperature", 25.5, {"sensor": "DHT22", "location": "sala-1"
 curl -X POST http://localhost:8080/otel/v1/metrics ...
 ```
 
-**Passo 4: Visualizar no SigNoz**
+**Passo 4: Visualizar no Dashboard**
 ```
-Seguir: SIGNOZ_VISUALIZATION.md → "Criar Dashboard para IoT"
+Acesse: http://localhost:8501 (ou http://172.161.94.218:8501)
 ```
 
 **Resultado:**
 - ✅ Dados sendo enviados
 - ✅ Armazenados no banco
-- ✅ Visíveis no SigNoz em tempo real
-- ✅ Dashboard criado e funcionando
+- ✅ Visíveis no dashboard em tempo real
+- ✅ Gráficos interativos funcionando
 
 ---
 
@@ -375,9 +374,8 @@ Seguir: SIGNOZ_VISUALIZATION.md → "Criar Dashboard para IoT"
 - [ ] Copiei a API Key correta
 - [ ] Enviei primeira métrica com sucesso (HTTP 200/201)
 - [ ] Métrica aparece em `/export/metrics`
-- [ ] SigNoz está rodando
-- [ ] Dashboard criado
-- [ ] Widgets adicionados
+- [ ] Dashboard acessível (porta 8501)
+- [ ] Gráficos visualizados
 - [ ] Alertas configurados
 - [ ] Team notificado
 
@@ -388,9 +386,9 @@ Seguir: SIGNOZ_VISUALIZATION.md → "Criar Dashboard para IoT"
 1. **Integração Básica**: Começar com um sensor/métrica
 2. **Batching**: Enviar múltiplas métricas em paralelo
 3. **Alertas**: Implementar alertas com GPT-4
-4. **Dashboard**: Criar dashboard customizado
+4. **Dashboard**: Customizar visualizações
 5. **Auto-retrain**: Disparar retrain automaticamente via alertas
-6. **Escalabilidade**: Configurar para produção (Oracle, SigNoz remoto)
+6. **Escalabilidade**: Configurar para produção (Oracle)
 
 ---
 
@@ -400,7 +398,7 @@ Seguir: SIGNOZ_VISUALIZATION.md → "Criar Dashboard para IoT"
 - **Zero Trust**: Sem autenticação = sem acesso
 - **Stateless**: JWT/API Key são suficientes
 - **Escalável**: Pronto para múltiplos times e sensores
-- **Observable**: Tudo rastreável via SigNoz
+- **Observable**: Dashboard Streamlit com métricas em tempo real
 
 **Bom trabalho! 🚀**
 

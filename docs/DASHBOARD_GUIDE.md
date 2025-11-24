@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O **Dashboard Humainze** é uma solução 100% open-source de visualização de métricas e alertas, construída com **Streamlit** e **Plotly**. Elimina a necessidade de ferramentas proprietárias como SigNoz, Grafana ou Datadog.
+O **Dashboard Humainze** é uma solução 100% open-source de visualização de métricas e alertas, construída com **Streamlit** e **Plotly**. Roda na porta **8501** e consome APIs REST do backend Java.
 
 ## 🎯 Principais Funcionalidades
 

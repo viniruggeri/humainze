@@ -7,12 +7,12 @@ Este guia descreve como o serviço de IA (Python com FastAPI/Flask) integra-se c
 1. **Autenticar** via JWT (login simples)
 2. **Enviar métricas** de modelos ML (acurácia, drift, latência, loss)
 3. **Criar alertas cognitivos** (drift detectado, erro de modelo)
-4. **Visualizar tudo** no **Dashboard Streamlit customizado**
+4. **Visualizar tudo** no **Dashboard Streamlit** (porta 8501)
 5. **Consultar histórico** via APIs REST com paginação
 
 ### Por que Backend Java como Observabilidade?
 
-✅ **Solução 100% open-source** - sem SigNoz, Grafana ou Datadog  
+✅ **Solução 100% open-source** - sem dependências externas  
 ✅ **Persistência em SQL** - métricas armazenadas em OracleDB/H2  
 ✅ **APIs REST padronizadas** - `/export/metrics`, `/alerts`  
 ✅ **Dashboard customizável** - Python + Streamlit, fácil de modificar  
@@ -345,49 +345,42 @@ for metric in latest["content"]:
 
 ---
 
-## 🔍 Visualizar no SigNoz
+## 📊 Visualizar no Dashboard
 
-### Configuração de OTEL no Backend
+### Acesso ao Dashboard Streamlit
 
-O backend Java já está configurado para exportar métricas para o SigNoz via OTEL/HTTP.
+**URL Local**: `http://localhost:8501`  
+**URL Azure**: `http://172.161.94.218:8501`
 
-**Variáveis de Ambiente** (arquivo `.env` ou `application-prod.yml`):
+### Funcionalidades Disponíveis
 
-```yaml
-otel:
-  exporter:
-    otlp:
-      endpoint: http://signoz-otel:4318
-      protocol: http
-  metrics:
-    export:
-      interval: 60000  # 60 segundos
+1. **Tab "🤖 Métricas IA"**:
+   - Gráficos interativos de acurácia, loss, drift
+   - Time series com Plotly
+   - Filtros por período e tipo de métrica
+   - Auto-refresh a cada 5 segundos
+
+2. **Tab "🚨 Alertas Ativos"**:
+   - Banner com contagem de alertas não resolvidos
+   - Histórico completo com paginação
+   - Botão para resolver alertas
+
+3. **Filtros Disponíveis**:
+   - Team: IA, IOT, ADMIN
+   - Período: última hora, 6h, 24h, 7 dias
+   - Tipo de métrica
+   - Status de alerta
+
+### Exemplo de Uso
+
+```python
+# Após enviar métricas, acesse:
+# http://localhost:8501
+
+# Selecione tab "Métricas IA"
+# Escolha período: "Últimas 24 horas"
+# Veja gráfico de model_accuracy em tempo real
 ```
-
-### URL do SigNoz
-
-```
-http://localhost:3301/dashboard
-```
-
-### Dashboard Recomendado
-
-1. **Acesse**: http://localhost:3301/dashboard
-2. **Nova Query** → Metrics
-3. **Métrica**: `model_accuracy`, `inference_time_ms`, `model_drift_score`
-4. **Filtro**: `team="IA"`
-5. **Agregação**: Last value, Average, Max
-
-### Exemplo de Query OTEL
-
-```
-SELECT
-  attributes['model'] as model,
-  value as accuracy,
-  timestamp
-FROM metrics
-WHERE
-  metric_name = 'model_accuracy'
   AND attributes['team'] = 'IA'
 ORDER BY timestamp DESC
 LIMIT 100
@@ -438,8 +431,8 @@ curl http://localhost:8080/export/metrics?page=0&size=10 \
 - [ ] Cliente Python criado (ver exemplo acima)
 - [ ] Primeiro envio de métrica testado
 - [ ] GPT-4 integrado para alertas
-- [ ] SigNoz acessível em http://localhost:3301
-- [ ] Dashboard criado no SigNoz
+- [ ] Dashboard acessível (porta 8501)
+- [ ] Métricas visualizadas no dashboard
 - [ ] Alertas sendo enviados corretamente
 - [ ] Equipe notificada dos novos endpoints
 
@@ -449,17 +442,17 @@ curl http://localhost:8080/export/metrics?page=0&size=10 \
 
 | Problema | Solução |
 |----------|---------|
-| `401 Unauthorized` | Verifique `X-API-KEY: chave-ia` |
+| `401 Unauthorized` | Verifique token JWT ou `X-API-KEY: chave-ia` |
 | `403 Forbidden` | Team tag não corresponde à role |
 | `500 Internal Server Error` | Verifique formato do `payloadJson` |
-| Métricas não aparecem no SigNoz | Verifique endpoint OTEL em `application.yml` |
+| Dashboard não carrega | Verifique se backend está rodando (porta 8080) |
 | GPT-4 não responde | Verifique `OPENAI_API_KEY` |
 
 ---
 
 ## 📞 Suporte
 
-Contate: backend-team@humainze.ai
+Repositório Backend: <https://github.com/viniruggeri/humainze>
 
-Repositório: https://github.com/humanize/humainze-dash
+Repositório IoT: <https://github.com/viniruggeri/humainze-iot>
 

@@ -8,24 +8,24 @@
 
 ## 🎯 Visão Geral
 
-O **Humainze Backend** é uma **solução completa de observabilidade open-source** que elimina dependências de ferramentas proprietárias como SigNoz, Grafana ou Datadog.
+O **Humainze Backend** é uma **solução completa de observabilidade open-source** sem dependências externas.
 
 ### Diferenciais
 
-- ✅ **Backend Java como servidor de telemetria** - recebe métricas/traces/logs
+- ✅ **Backend Java como coletor OTLP** - recebe métricas/traces/logs via HTTP
 - ✅ **Persistência em banco SQL** - OracleDB (prod) ou H2 (dev)
 - ✅ **APIs REST padronizadas** - paginação, filtros, ordenação
-- ✅ **Dashboard Streamlit customizado** - 100% Python, fácil de modificar
-- ✅ **Sistema de alertas integrado** - tempo real com auto-refresh
+- ✅ **Dashboard Streamlit (porta 8501)** - 100% Python, visualização em tempo real
+- ✅ **Sistema de alertas integrado** - visualização no dashboard
 - ✅ **Totalmente open-source** - sem custos de licenciamento
 
 ### Stack Tecnológico
 
 - **Backend:** Java 21, Spring Boot 3.5.7, Spring Security + JWT
 - **Persistência:** Spring Data JPA, OracleDB (prod), H2 (dev)
-- **Observabilidade:** Backend Java como servidor OTLP customizado
-- **Dashboard:** Python 3.11, Streamlit, Plotly, Pandas
-- **Deploy:** Docker, Docker Compose, Azure VM
+- **Observabilidade:** Backend Java como coletor OTLP via HTTP
+- **Dashboard:** Python 3.11, Streamlit (porta 8501), Plotly, Pandas
+- **Deploy:** Azure VM (IP: 172.161.94.218)
 
 ---
 
@@ -134,16 +134,16 @@ void loop() {
 
 ---
 
-## 📊 Visualizar no SigNoz
+## 📊 Visualizar Dados
 
-**Documentação**: `docs/SIGNOZ_VISUALIZATION.md`
+**Dashboard Streamlit**: `http://172.161.94.218:8501` (Azure) ou `http://localhost:8501` (local)
 
-**URL**: `http://localhost:3301`
-
-**Em 3 passos:**
-1. Levante SigNoz: `docker-compose -f docker-compose-signoz.yml up -d`
-2. Envie uma métrica (veja acima)
-3. Crie um dashboard em http://localhost:3301
+**Recursos disponíveis:**
+- Gráficos interativos (Plotly)
+- Métricas em tempo real (IoT e IA)
+- Sistema de alertas
+- Filtros por team e período
+- Auto-refresh a cada 5 segundos
 
 **Exemplo de Dashboard IA:**
 - Widget 1: Acurácia do Modelo (Gauge)
@@ -279,7 +279,7 @@ curl "http://localhost:8080/export/metrics?teamTag=IA&page=0&size=20" \
 | `INTEGRATION_GUIDE_IA.md` | Team IA | Enviar métricas de modelos, alertas com GPT-4, Python examples |
 | `INTEGRATION_GUIDE_IOT.md` | Team IoT | Arduino/ESP32/RPi, sensores, auto-inicialização, testes |
 | `PAYLOAD_EXAMPLES.md` | Todos | Copy & Paste: 25+ exemplos de payload prontos |
-| `SIGNOZ_VISUALIZATION.md` | Todos | Levantar SigNoz, criar dashboards, alertas Slack/Email |
+| `DASHBOARD_GUIDE.md` | Todos | Dashboard Streamlit (porta 8501), gráficos interativos |
 | `ZERO_TRUST_AUTH.md` | Devs | Arquitetura de autenticação Zero Trust |
 | `INDEX.md` | Todos | Índice e mapa de navegação |
 
@@ -313,8 +313,8 @@ Contém:
 4. Enviar primeira métrica
 
 **Depois:**
-1. Levantar SigNoz
-2. Criar dashboard
+1. Acessar dashboard Streamlit (porta 8501)
+2. Visualizar métricas em tempo real
 3. Configurar alertas
 4. Implementar auto-retrain (IA)
 5. Escalar para produção
@@ -328,7 +328,7 @@ Contém:
 | `401 Unauthorized` | Verifique a API Key no header `X-API-KEY` |
 | `403 Forbidden` | Verifique se a role do seu time tem permissão |
 | `Invalid JSON` | Valide formato do `payloadJson` (deve ser STRING escapado) |
-| Sem dados no SigNoz | Verifique endpoint OTEL e aguarde 1 min |
+| Dashboard não carrega | Verifique se backend está rodando (porta 8080) |
 | Conexão recusada | Verifique IP/porta do backend (default: localhost:8080) |
 
 ---
@@ -346,7 +346,7 @@ Contém:
 
 ✅ Backend pronto para receber métricas de IA e IoT  
 ✅ Autenticação Zero Trust implementada  
-✅ OTEL/HTTP para SigNoz integrado  
+✅ Dashboard Streamlit na porta 8501  
 ✅ Alertas inteligentes com GPT-4  
 ✅ Documentação completa  
 ✅ Exemplos prontos para usar  

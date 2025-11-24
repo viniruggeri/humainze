@@ -355,7 +355,7 @@ alerts.unresolved.count{team="IA"} = 7
 alerts.resolution.time.seconds{team="IA", quantile="0.95"} = 120
 ```
 
-### Queries SigNoz
+### Queries SQL para Análise
 
 ```sql
 -- Alertas por tipo nas últimas 24h
@@ -363,14 +363,14 @@ SELECT
   type, 
   COUNT(*) as count
 FROM alerts
-WHERE timestamp >= now() - interval '24 hours'
+WHERE timestamp >= CURRENT_TIMESTAMP - INTERVAL '24' HOUR
 GROUP BY type
 ORDER BY count DESC;
 
 -- Tempo médio de resolução por team
 SELECT 
   teamTag,
-  AVG(EXTRACT(EPOCH FROM (resolvedAt - timestamp))) as avg_resolution_seconds
+  AVG(TIMESTAMPDIFF(SECOND, timestamp, resolvedAt)) as avg_resolution_seconds
 FROM alerts
 WHERE resolved = true
 GROUP BY teamTag;

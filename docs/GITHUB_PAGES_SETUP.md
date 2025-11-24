@@ -38,7 +38,7 @@ docs/
 ├── INTEGRATION_GUIDE_IOT.md     ← Guia IoT
 ├── OTEL_INGESTION_ENDPOINTS.md  ← Endpoints OTLP
 ├── PAYLOAD_EXAMPLES.md          ← Exemplos de payloads
-├── SIGNOZ_VISUALIZATION.md      ← Visualização SigNoz
+├── DASHBOARD_GUIDE.md             ← Dashboard Streamlit (porta 8501)
 ├── ALERTS_SYSTEM.md             ← Sistema de alertas
 └── DEPLOY_AZURE.md              ← Deploy Azure VM
 ```

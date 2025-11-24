@@ -447,57 +447,29 @@ curl -X PUT "http://localhost:8080/alerts/1/resolve" \
 
 ---
 
-## 🔍 SigNoz - Queries de Exemplo
+## 📊 Visualização no Dashboard
 
-### Query 1: Temperatura ao longo do tempo (IoT)
+Após enviar métricas, acesse o **Dashboard Streamlit** para visualizar:
 
-```sql
-SELECT
-  JSON_EXTRACT(payloadJson, '$.location') as location,
-  JSON_EXTRACT(payloadJson, '$.value') as temperature,
-  timestamp
-FROM metrics
-WHERE
-  metric_name = 'temperature'
-  AND attributes['team'] = 'IOT'
-ORDER BY timestamp DESC
-LIMIT 100
-```
+**URL Local**: `http://localhost:8501`  
+**URL Azure**: `http://172.161.94.218:8501`
 
----
+### Exemplos de Visualização
 
-### Query 2: Acurácia do Modelo (IA)
+**Tab "📡 Métricas IoT":**
+- Time series de temperatura, umidade, CO2
+- Gauge com valores atuais
+- Filtros por sensor e local
 
-```sql
-SELECT
-  JSON_EXTRACT(payloadJson, '$.model') as model,
-  JSON_EXTRACT(payloadJson, '$.value') as accuracy,
-  timestamp
-FROM metrics
-WHERE
-  metric_name = 'model_accuracy'
-  AND attributes['team'] = 'IA'
-ORDER BY timestamp DESC
-LIMIT 100
-```
+**Tab "🤖 Métricas IA":**
+- Gráficos de acurácia, loss, drift
+- Line charts de evolução temporal
+- Filtros por modelo e dataset
 
----
-
-### Query 3: Detecção de Drift
-
-```sql
-SELECT
-  JSON_EXTRACT(payloadJson, '$.model') as model,
-  JSON_EXTRACT(payloadJson, '$.value') as drift_score,
-  JSON_EXTRACT(payloadJson, '$.threshold') as threshold,
-  timestamp
-FROM metrics
-WHERE
-  metric_name = 'model_drift_score'
-  AND attributes['team'] = 'IA'
-  AND JSON_EXTRACT(payloadJson, '$.value') > JSON_EXTRACT(payloadJson, '$.threshold')
-ORDER BY timestamp DESC
-```
+**Tab "🚨 Alertas":**
+- Banner com contagem de alertas ativos
+- Histórico completo com paginação
+- Botão para resolver alertas
 
 ---
 
@@ -539,5 +511,5 @@ curl -X POST http://localhost:8080/alerts -H "X-API-KEY: chave-ia" -H "Content-T
 - [ ] API Key correta no header `X-API-KEY`
 - [ ] HTTP 200/201 recebido
 - [ ] Métrica aparece em `/export/metrics`
-- [ ] Dashboard do SigNoz atualizado
+- [ ] Dashboard visualizando dados (porta 8501)
 
