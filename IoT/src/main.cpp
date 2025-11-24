@@ -38,7 +38,7 @@ const char *WIFI_PASSWORD = "";        // Para Wokwi: deixar vazio
 
 // ========== CONFIGURAÇÕES Backend ==========
 const char *BACKEND_HOST = "192.168.15.7"; // IP do backend local
-const int BACKEND_PORT = 8080;             // Porta do backend (8080 - Expo usa 8081)
+const int BACKEND_PORT = 8080;             // Porta do backend (8080)
 const char *API_KEY = "chave-iot";         // API Key do time IOT
 const char *TEAM_NAME = "IOT";             // Nome do time (usado no payload)
 const char *LOCATION = "sala-1";           // Identificação da sala
