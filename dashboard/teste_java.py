@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Configurações
-JAVA_BASE_URL = "http://localhost:8081"
+JAVA_BASE_URL = "http://localhost:8080"
 API_KEYS = {
     "admin": "chave-admin",
     "ia": "chave-ia", 

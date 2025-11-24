@@ -32,3 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 .env
+.IA/
+IA/
+mobile/
+dotnet/
+roteiro/
+entrega-java.txt

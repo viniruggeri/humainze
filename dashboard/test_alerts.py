@@ -7,7 +7,7 @@ import requests
 import time
 from datetime import datetime
 
-BACKEND_URL = "http://localhost:8081"
+BACKEND_URL = "http://localhost:8080"
 
 def login(api_key):
     """Autentica e retorna token"""

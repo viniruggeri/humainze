@@ -7,9 +7,10 @@ Testa RBAC e gera telemetria de sensores IoT
 import requests
 import time
 import random
-from datetime import datetime
+import json
+from datetime import datetime, timezone
 
-JAVA_BASE_URL = "http://localhost:8081"
+JAVA_BASE_URL = "http://localhost:8080"
 API_KEY_IOT = "chave-iot"
 
 class IOTSimulator:
@@ -101,9 +102,43 @@ class IOTSimulator:
     
     def send_sensor_telemetry(self, device_id, sensor_type, value, unit):
         """Envia telemetria de sensor IoT via OTLP"""
-        print(f"   📊 {device_id} - {sensor_type}: {value}{unit}")
-        # Aqui poderia enviar via OTLP para /otel/v1/metrics
-        # Por enquanto apenas simula
+        headers = {"Authorization": f"Bearer {self.token}"}
+        
+        # Mapear sensor_type para metric_name esperado
+        metric_map = {
+            "Temperature": "temperature",
+            "Humidity": "humidity",
+            "Pressure": "air_quality_ppm",
+            "Light": "luminosity_lux"
+        }
+        
+        metric_name = metric_map.get(sensor_type, sensor_type.lower())
+        
+        # Formato esperado pelo dashboard
+        metrics = [{
+            "key": metric_name,
+            "value": value,
+            "timestamp": datetime.utcnow().isoformat(),
+            "originModule": "IOT",
+            "metadata": {"sensor": device_id, "unit": unit}
+        }]
+        
+        payload = {
+            "teamTag": "IOT",
+            "timestamp": datetime.utcnow().isoformat(),
+            "payloadJson": json.dumps(metrics)
+        }
+        
+        try:
+            self.session.post(
+                f"{JAVA_BASE_URL}/otel/v1/metrics",
+                json=payload,
+                headers=headers
+            )
+            print(f"   📊 {device_id} - {sensor_type}: {value}{unit} [ENVIADO]")
+        except Exception as e:
+            print(f"   ❌ Erro: {e}")
+        
         time.sleep(0.3)
     
     def simulate_temperature_sensors(self):

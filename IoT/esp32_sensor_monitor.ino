@@ -37,11 +37,11 @@ const char *WIFI_PASSWORD = "";        // Para Wokwi: deixar vazio
 // Para WiFi real, altere acima
 
 // ========== CONFIGURAÇÕES Backend ==========
-const char *BACKEND_HOST = "192.168.1.100"; // IP do backend Java
-const int BACKEND_PORT = 8080;
-const char *TEAM_NAME = "IOT";
-const char *TEAM_SECRET = "iot-secret";
-const char *LOCATION = "sala-1"; // Identificação da sala
+const char *BACKEND_HOST = "192.168.15.7"; // IP do backend local
+const int BACKEND_PORT = 8080;             // Porta do backend (8080 - Expo usa 8081)
+const char *API_KEY = "chave-iot";         // API Key do time IOT
+const char *TEAM_NAME = "IOT";             // Nome do time (usado no payload)
+const char *LOCATION = "sala-1";           // Identificação da sala
 
 // ========== CONFIGURAÇÕES Sensores ==========
 #define DHT_PIN 4 // GPIO 4 para DHT22
@@ -166,23 +166,15 @@ bool fazerLogin()
     }
 
     HTTPClient http;
-    String url = String("http://") + BACKEND_HOST + ":" + BACKEND_PORT + "/auth/login";
+    String url = String("http://") + BACKEND_HOST + ":" + BACKEND_PORT + "/auth/token";
 
     http.begin(url);
-    http.addHeader("Content-Type", "application/json");
+    http.addHeader("X-API-KEY", API_KEY);
 
-    // Payload de login
-    StaticJsonDocument<200> loginDoc;
-    loginDoc["team"] = TEAM_NAME;
-    loginDoc["secret"] = TEAM_SECRET;
-
-    String loginPayload;
-    serializeJson(loginDoc, loginPayload);
-
-    Serial.println("[LOGIN] Autenticando...");
+    Serial.println("[LOGIN] Autenticando com API Key...");
     Serial.println("URL: " + url);
 
-    int httpCode = http.POST(loginPayload);
+    int httpCode = http.POST(""); // POST vazio com API Key no header
 
     if (httpCode == 200)
     {
@@ -359,18 +351,23 @@ bool enviarMetrica(String metric, float value, String sensor)
     http.addHeader("Authorization", "Bearer " + jwtToken);
     http.addHeader("Content-Type", "application/json");
 
-    // Construir payloadJson interno
-    StaticJsonDocument<256> innerDoc;
-    innerDoc["metric"] = metric;
-    innerDoc["value"] = value;
-    innerDoc["sensor"] = sensor;
-    innerDoc["location"] = LOCATION;
+    // Construir payload OTLP completo
+    String timestamp = String(millis());
 
-    String payloadJson;
-    serializeJson(innerDoc, payloadJson);
+    String payloadJson = "{\"resourceMetrics\":[{\"resource\":{\"attributes\":["
+                         "{\"key\":\"service.name\",\"value\":{\"stringValue\":\"" +
+                         String(sensor) + "\"}},"
+                                          "{\"key\":\"device.id\",\"value\":{\"stringValue\":\"ESP32-" +
+                         String(LOCATION) + "\"}}"
+                                            "]},\"scopeMetrics\":[{\"metrics\":[{\"name\":\"" +
+                         metric + "\","
+                                  "\"unit\":\"\",\"gauge\":{\"dataPoints\":[{\"asDouble\":" +
+                         String(value, 2) + ","
+                                            "\"timeUnixNano\":" +
+                         timestamp + "000000}]}}]}]}]}";
 
     // Construir request body
-    StaticJsonDocument<512> requestDoc;
+    StaticJsonDocument<1024> requestDoc;
     requestDoc["teamTag"] = TEAM_NAME;
     requestDoc["timestamp"] = getISOTimestamp();
     requestDoc["payloadJson"] = payloadJson;

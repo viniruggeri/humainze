@@ -322,20 +322,26 @@ def get_metrics(role: str):
     
     for row in data:
         attributes = json.loads(row['attributes'])
+        service_name = row.get('service_name', '')
         metric_name = row['metric_name']
+        team = attributes.get('team', '')
         
         # Lógica de Zero Trust / RBAC
         if role == "ROLE_ADMIN":
-            filtered_data.append(row) # Admin vê tudo
+            filtered_data.append(row)  # Admin vê TUDO (IA + IoT + Java)
             
         elif role == "ROLE_IOT":
-            # IoT vê apenas coisas marcadas como IOT ou métricas de sensores
-            if "IOT" in str(attributes) or "temperature" in metric_name or "humidity" in metric_name:
+            # IoT vê apenas métricas de serviços IoT ou sensores físicos
+            if (team == "IOT" or 
+                "humainze-iot" in service_name or
+                metric_name in ["temperature", "humidity", "air_quality_ppm", "luminosity_lux"]):
                 filtered_data.append(row)
                 
         elif role == "ROLE_IA":
-            # IA vê apenas coisas marcadas como IA ou métricas de modelo
-            if "IA" in str(attributes) or "model" in metric_name or "accuracy" in metric_name:
+            # IA vê apenas métricas de serviços IA ou ML
+            if (team == "IA" or 
+                "humainze-ia" in service_name or
+                metric_name in ["mobile_dashboard_views", "prediction_count", "anomalies_detected", "model_inference_duration_ms"]):
                 filtered_data.append(row)
     
     return filtered_data
@@ -353,14 +359,19 @@ def get_traces(role: str):
     
     for row in data:
         attributes = json.loads(row['attributes'])
+        service_name = row.get('service_name', '')
+        team = attributes.get('team', '')
+        
         # RBAC Logic
         if role == "ROLE_ADMIN":
-            filtered_data.append(row)
+            filtered_data.append(row)  # Admin vê TODOS os traces
         elif role == "ROLE_IOT":
-            if "IOT" in str(attributes):
+            # IoT vê apenas traces de dispositivos IoT
+            if team == "IOT" or "humainze-iot" in service_name:
                 filtered_data.append(row)
         elif role == "ROLE_IA":
-            if "IA" in str(attributes):
+            # IA vê apenas traces de operações de ML
+            if team == "IA" or "humainze-ia" in service_name:
                 filtered_data.append(row)
                 
     return filtered_data
@@ -378,14 +389,19 @@ def get_logs(role: str):
     
     for row in data:
         attributes = json.loads(row['attributes'])
+        service_name = row.get('service_name', '')
+        team = attributes.get('team', '')
+        
         # RBAC Logic
         if role == "ROLE_ADMIN":
-            filtered_data.append(row)
+            filtered_data.append(row)  # Admin vê TODOS os logs
         elif role == "ROLE_IOT":
-            if "IOT" in str(attributes):
+            # IoT vê apenas logs de dispositivos IoT
+            if team == "IOT" or "humainze-iot" in service_name or attributes.get('device.id'):
                 filtered_data.append(row)
         elif role == "ROLE_IA":
-            if "IA" in str(attributes):
+            # IA vê apenas logs de operações de ML
+            if team == "IA" or "humainze-ia" in service_name or attributes.get('module') in ['ml.inference', 'api.mobile', 'cache.manager', 'db.connector']:
                 filtered_data.append(row)
                 
     return filtered_data

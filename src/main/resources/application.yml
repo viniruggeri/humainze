@@ -1,13 +1,16 @@
 server:
-  port: 8081
+  port: 8080  # Expo/React Native usa 8081
 spring:
   active:
-    profiles: prod
+    profiles: dev
   application:
     name: humainze-dash
+  sql:
+    init:
+      mode: never  # Desabilita schema.sql (Oracle syntax incompatível com H2)
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop  # H2 cria schema automaticamente
     properties:
       hibernate:
         format_sql: true
@@ -29,7 +32,7 @@ otel:
     otlp:
       endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
   export:
-    enabled: true
+    enabled: false  # Desabilita exportação OTLP local
 telemetry:
   teamTag: humainze
 ia:
@@ -44,7 +47,7 @@ management:
   otlp:
     metrics:
       export:
-        enabled: true
+        enabled: false  # Desabilita métricas OTLP local
         url: http://localhost:4318/v1/metrics
         step: 30s
         connect-timeout: 5s

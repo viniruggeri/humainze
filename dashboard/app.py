@@ -27,7 +27,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Constantes
-JAVA_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8081")
+JAVA_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8080")  # 8080 - Expo/React Native usa 8081
 PYTHON_COLLECTOR_URL = os.getenv("COLLECTOR_URL", "http://collector:4318")
 
 # ========== SESSÃO ==========
@@ -73,54 +73,54 @@ def login(api_key):
         return None, None, None
 
 def fetch_secure_metrics(token, role):
-    """Busca métricas do backend Java"""
+    """Busca métricas do collector FastAPI (porta 4318)"""
     try:
-        headers = {"Authorization": f"Bearer {token}"}
+        # Busca do collector OTLP, não do backend Java
         response = requests.get(
-            f"{JAVA_BACKEND_URL}/export/metrics",
-            headers=headers,
-            params={"page": 0, "size": 500},
+            "http://localhost:4318/api/metrics",
+            params={"role": role},
             timeout=10
         )
         if response.status_code == 200:
             data = response.json()
-            return data.get("content", [])
+            print(f"🔍 DEBUG: Recebidas {len(data)} métricas do collector")
+            if data:
+                print(f"🔍 DEBUG: Primeira métrica: {data[0]}")
+            return data
+        else:
+            print(f"🔍 DEBUG: Status {response.status_code} ao buscar métricas")
         return []
     except Exception as e:
         print(f"Erro ao buscar métricas: {e}")
         return []
 
 def fetch_secure_traces(token, role):
-    """Busca traces do backend Java"""
+    """Busca traces do collector FastAPI (porta 4318)"""
     try:
-        headers = {"Authorization": f"Bearer {token}"}
+        # Busca do collector OTLP, não do backend Java
         response = requests.get(
-            f"{JAVA_BACKEND_URL}/export/traces",
-            headers=headers,
-            params={"page": 0, "size": 500},
+            "http://localhost:4318/api/traces",
+            params={"role": role},
             timeout=10
         )
         if response.status_code == 200:
-            data = response.json()
-            return data.get("content", [])
+            return response.json()
         return []
     except Exception as e:
         print(f"Erro ao buscar traces: {e}")
         return []
 
 def fetch_secure_logs(token, role):
-    """Busca logs do backend Java"""
+    """Busca logs do collector FastAPI (porta 4318)"""
     try:
-        headers = {"Authorization": f"Bearer {token}"}
+        # Busca do collector OTLP, não do backend Java
         response = requests.get(
-            f"{JAVA_BACKEND_URL}/export/logs",
-            headers=headers,
-            params={"page": 0, "size": 500},
+            "http://localhost:4318/api/logs",
+            params={"role": role},
             timeout=10
         )
         if response.status_code == 200:
-            data = response.json()
-            return data.get("content", [])
+            return response.json()
         return []
     except Exception as e:
         print(f"Erro ao buscar logs: {e}")
@@ -391,59 +391,40 @@ with tab1:
     if not metrics_data:
         st.warning("⚠️ Nenhuma métrica disponível no momento.")
     else:
-        # Parse payloadJson para extrair métricas detalhadas
+        # O collector retorna dados já processados do SQLite
+        # Formato: [{"timestamp": "...", "service_name": "...", "metric_name": "...", "value": 123, "unit": "...", "attributes": "{}"}]
         flat_metrics = []
         for item in metrics_data:
             try:
-                payload = json.loads(item['payloadJson'])
-                for rm in payload.get('resourceMetrics', []):
-                    # Extrair atributos do resource
-                    service_name = 'unknown'
-                    device_id = None
-                    model_name = None
-                    
-                    for attr in rm.get('resource', {}).get('attributes', []):
-                        key = attr.get('key')
-                        value = attr.get('value', {}).get('stringValue', '')
-                        
-                        if key == 'service.name':
-                            service_name = value
-                        elif key == 'device.id':
-                            device_id = value
-                        elif key == 'model.name':
-                            model_name = value
-                    
-                    # Use device_id para IoT ou model_name para IA, fallback para service_name
-                    display_name = device_id or model_name or service_name
-                    
-                    for sm in rm.get('scopeMetrics', []):
-                        for metric in sm.get('metrics', []):
-                            metric_name = metric.get('name', 'unknown')
-                            unit = metric.get('unit', '')
-                            
-                            data_points = metric.get('gauge', {}).get('dataPoints', []) or \
-                                        metric.get('sum', {}).get('dataPoints', [])
-                            
-                            for dp in data_points:
-                                value = dp.get('asDouble', dp.get('asInt', 0))
-                                timestamp = pd.to_datetime(item['timestamp'])
-                                
-                                flat_metrics.append({
-                                    'metric_name': metric_name,
-                                    'service_name': display_name,  # Usando device_id ou model_name
-                                    'value': value,
-                                    'unit': unit,
-                                    'timestamp': timestamp,
-                                    'teamTag': item['teamTag']
-                                })
+                # Parse attributes JSON
+                attributes = json.loads(item.get('attributes', '{}'))
+                team = attributes.get('team', 'UNKNOWN')
+                
+                flat_metrics.append({
+                    'metric_name': item.get('metric_name'),
+                    'service_name': item.get('service_name'),
+                    'value': float(item.get('value', 0)),
+                    'unit': item.get('unit', ''),
+                    'timestamp': pd.to_datetime(item.get('timestamp')),
+                    'teamTag': team
+                })
             except Exception as e:
+                print(f"🔍 DEBUG: Erro ao processar métrica: {e}")
                 continue
+        
+        print(f"🔍 DEBUG: Total de flat_metrics processadas: {len(flat_metrics)}")
+        if flat_metrics:
+            print(f"🔍 DEBUG: Primeira flat_metric: {flat_metrics[0]}")
         
         if not flat_metrics:
             st.warning("⚠️ Nenhuma métrica válida encontrada.")
         else:
             df = pd.DataFrame(flat_metrics)
             st.success(f"✅ {len(df)} métricas carregadas")
+            print(f"🔍 DEBUG: DataFrame criado com {len(df)} linhas")
+            print(f"🔍 DEBUG: Colunas do DataFrame: {df.columns.tolist()}")
+            if len(df) > 0:
+                print(f"🔍 DEBUG: Primeira linha do DataFrame: {df.iloc[0].to_dict()}")
             
             # Pegar role do session state
             role = st.session_state.role
@@ -452,23 +433,30 @@ with tab1:
             if role == "ROLE_IOT":
                 st.subheader("🌡️ Monitoramento de Sensores ESP32")
                 
-                # Definir métricas IoT com ícones e cores
+                # Definir métricas IoT com ícones e cores (aceita ambos formatos)
                 iot_metrics = {
-                    'environment.temperature': {'icon': '🌡️', 'title': 'Temperatura', 'unit': '°C', 'color': '#FF6B6B'},
-                    'environment.humidity': {'icon': '💧', 'title': 'Umidade', 'unit': '%', 'color': '#4ECDC4'},
-                    'environment.co2': {'icon': '☁️', 'title': 'CO2', 'unit': 'ppm', 'color': '#95E1D3'},
-                    'environment.luminosity': {'icon': '💡', 'title': 'Luminosidade', 'unit': 'lux', 'color': '#FFE66D'}
+                    'temperature': {'icon': '🌡️', 'title': 'Temperatura', 'unit': '°C', 'color': '#FF6B6B'},
+                    'humidity': {'icon': '💧', 'title': 'Umidade', 'unit': '%', 'color': '#4ECDC4'},
+                    'air_quality_ppm': {'icon': '☁️', 'title': 'Qualidade do Ar (CO2)', 'unit': 'ppm', 'color': '#95E1D3'},
+                    'luminosity_lux': {'icon': '💡', 'title': 'Luminosidade', 'unit': 'lux', 'color': '#FFE66D'}
                 }
+                
+                print(f"🔍 DEBUG: Métricas únicas no DataFrame: {df['metric_name'].unique().tolist()}")
                 
                 for metric_key, config in iot_metrics.items():
                     metric_df = df[df['metric_name'] == metric_key]
                     
+                    print(f"🔍 DEBUG: Procurando métrica '{metric_key}' - encontradas {len(metric_df)} linhas")
+                    
                     if not metric_df.empty:
                         st.markdown(f"### {config['icon']} {config['title']}")
+                        
+                        print(f"🔍 DEBUG: Criando gráfico para '{metric_key}' com {len(metric_df)} pontos")
                         
                         fig = go.Figure()
                         for service in metric_df['service_name'].unique():
                             service_data = metric_df[metric_df['service_name'] == service].sort_values('timestamp')
+                            print(f"🔍 DEBUG: Adicionando trace para sensor '{service}' com {len(service_data)} pontos")
                             fig.add_trace(go.Scatter(
                                 x=service_data['timestamp'],
                                 y=service_data['value'],
@@ -495,7 +483,9 @@ with tab1:
                             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                         )
                         
-                        st.plotly_chart(fig, width='stretch')
+                        print(f"🔍 DEBUG: Renderizando gráfico com st.plotly_chart")
+                        st.plotly_chart(fig, use_container_width=True, key=f"iot_{metric_key}")
+                        print(f"🔍 DEBUG: Gráfico renderizado com sucesso")
                         
                         # Estatísticas rápidas
                         col1, col2, col3 = st.columns(3)
@@ -588,12 +578,12 @@ with tab1:
                 with tab_iot:
                     iot_data = df[df['teamTag'] == 'IOT']
                     if not iot_data.empty:
-                        # Métricas IoT individuais
+                        # Métricas IoT individuais (nomes reais do ESP32)
                         iot_metrics = {
-                            'environment.temperature': {'title': '🌡️ Temperatura', 'color': '#FF6B6B'},
-                            'environment.humidity': {'title': '💧 Umidade', 'color': '#4ECDC4'},
-                            'environment.co2': {'title': '☁️ CO2', 'color': '#95E1D3'},
-                            'environment.luminosity': {'title': '💡 Luminosidade', 'color': '#FFE66D'}
+                            'temperature': {'title': '🌡️ Temperatura', 'color': '#FF6B6B'},
+                            'humidity': {'title': '💧 Umidade', 'color': '#4ECDC4'},
+                            'air_quality_ppm': {'title': '☁️ Qualidade do Ar (CO2)', 'color': '#95E1D3'},
+                            'luminosity_lux': {'title': '💡 Luminosidade', 'color': '#FFE66D'}
                         }
                         
                         for metric_name, config in iot_metrics.items():
@@ -627,11 +617,11 @@ with tab1:
                 with tab_ia:
                     ia_data = df[df['teamTag'] == 'IA']
                     if not ia_data.empty:
-                        # Métricas IA individuais
+                        # Métricas IA individuais (nomes reais enviados)
                         ia_metrics = {
-                            'ml.prediction.confidence': {'title': '🎯 Confiança', 'color': '#A8E6CF'},
-                            'ml.model.drift': {'title': '📊 Drift', 'color': '#FFD3B6'},
-                            'ml.inference.duration': {'title': '⚡ Tempo Inferência', 'color': '#FFAAA5'}
+                            'mobile_dashboard_views': {'title': '📱 Visualizações Dashboard', 'color': '#A8E6CF'},
+                            'prediction_count': {'title': '🔮 Total de Predições', 'color': '#FFD3B6'},
+                            'anomalies_detected': {'title': '⚠️ Anomalias Detectadas', 'color': '#FFAAA5'}
                         }
                         
                         for metric_name, config in ia_metrics.items():
@@ -709,93 +699,130 @@ with tab2:
     if not traces_data:
         st.info("ℹ️ Nenhum trace capturado. Execute operações na aplicação.")
     else:
-        # Parse traces
-        parsed_traces = []
-        for item in traces_data:
-            try:
-                payload = json.loads(item['payloadJson'])
-                parsed_traces.append({
-                    'id': item['id'],
-                    'teamTag': item['teamTag'],
-                    'timestamp': item['timestamp'],
-                    'payload': payload
-                })
-            except:
-                continue
+        # O collector retorna dados já processados do SQLite
+        # Formato: [{"timestamp": "...", "trace_id": "...", "span_id": "...", "service_name": "...", "operation_name": "...", "duration_ms": 123, "attributes": "{}"}]
         
-        if not parsed_traces:
-            st.warning("⚠️ Nenhum trace válido encontrado.")
-        else:
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Total de Traces", len(parsed_traces))
-            with col2:
-                st.metric("IA Traces", len([t for t in parsed_traces if t['teamTag'] == 'IA']))
-            with col3:
-                st.metric("IOT Traces", len([t for t in parsed_traces if t['teamTag'] == 'IOT']))
-            
-            # Mostrar tabela
-            st.subheader("🔍 Traces Capturados")
-            df_display = pd.DataFrame([
-                {
-                    'ID': t['id'],
-                    'Team': t['teamTag'],
-                    'Timestamp': t['timestamp'][:19]
-                }
-                for t in parsed_traces
-            ])
-            st.dataframe(df_display, use_container_width=True)
-            
-            if show_raw_data:
-                with st.expander("🔍 Dados Brutos - Traces JSON"):
-                    for t in parsed_traces[:5]:
-                        st.json(t['payload'])
+        # Agrupar por team extraindo dos attributes
+        traces_by_team = {"IA": [], "IOT": [], "UNKNOWN": []}
+        for trace in traces_data:
+            try:
+                attributes = json.loads(trace.get('attributes', '{}'))
+                team = attributes.get('team', 'UNKNOWN')
+                traces_by_team[team].append(trace)
+            except:
+                traces_by_team['UNKNOWN'].append(trace)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total de Traces", len(traces_data))
+        with col2:
+            st.metric("IA Traces", len(traces_by_team.get('IA', [])))
+        with col3:
+            st.metric("IOT Traces", len(traces_by_team.get('IOT', [])))
+        
+        # Mostrar tabela
+        st.subheader("🔍 Traces Capturados")
+        df_display = pd.DataFrame([
+            {
+                'Trace ID': t.get('trace_id', 'N/A')[:16] + '...',
+                'Operação': t.get('operation_name', 'N/A'),
+                'Serviço': t.get('service_name', 'N/A'),
+                'Duração (ms)': f"{float(t.get('duration_ms', 0)):.2f}",
+                'Timestamp': t.get('timestamp', 'N/A')[:19]
+            }
+            for t in traces_data[:50]
+        ])
+        st.dataframe(df_display, use_container_width=True)
+        
+        if show_raw_data:
+            with st.expander("🔍 Dados Brutos - Traces"):
+                for t in traces_data[:5]:
+                    st.json(t)
 
 with tab3:
     if not logs_data:
         st.info("ℹ️ Nenhum log capturado. Verifique a configuração do logback.")
     else:
-        # Parse logs
-        parsed_logs = []
-        for item in logs_data:
-            try:
-                payload = json.loads(item['payloadJson'])
-                parsed_logs.append({
-                    'id': item['id'],
-                    'teamTag': item['teamTag'],
-                    'timestamp': item['timestamp'],
-                    'payload': payload
-                })
-            except:
-                continue
+        # O collector retorna dados já processados do SQLite
+        # Formato: [{"timestamp": "...", "service_name": "...", "severity_text": "INFO", "body": "...", "attributes": "{}"}]
         
-        if not parsed_logs:
-            st.warning("⚠️ Nenhum log válido encontrado.")
-        else:
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Total de Logs", len(parsed_logs))
-            with col2:
-                st.metric("IA Logs", len([l for l in parsed_logs if l['teamTag'] == 'IA']))
-            with col3:
-                st.metric("IOT Logs", len([l for l in parsed_logs if l['teamTag'] == 'IOT']))
+        # Agrupar por team e severidade
+        logs_by_team = {"IA": [], "IOT": [], "UNKNOWN": []}
+        logs_by_severity = {"INFO": 0, "WARN": 0, "ERROR": 0}
+        
+        for log in logs_data:
+            try:
+                attributes = json.loads(log.get('attributes', '{}'))
+                team = attributes.get('team', 'UNKNOWN')
+                logs_by_team[team].append(log)
+                
+                severity = log.get('severity_text', 'INFO')
+                if severity in logs_by_severity:
+                    logs_by_severity[severity] += 1
+            except:
+                logs_by_team['UNKNOWN'].append(log)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Total de Logs", len(logs_data))
+        with col2:
+            st.metric("🔵 INFO", logs_by_severity['INFO'])
+        with col3:
+            st.metric("🟡 WARN", logs_by_severity['WARN'])
+        with col4:
+            st.metric("🔴 ERROR", logs_by_severity['ERROR'])
+        
+        # Filtro de severidade
+        severity_filter = st.multiselect(
+            "Filtrar por Severidade",
+            ["INFO", "WARN", "ERROR"],
+            default=["INFO", "WARN", "ERROR"]
+        )
+        
+        filtered_logs = [l for l in logs_data if l.get('severity_text') in severity_filter]
+        
+        # Mostrar logs com cores
+        st.subheader("📄 Logs do Sistema")
+        
+        for log in filtered_logs[:100]:
+            severity = log.get('severity_text', 'INFO')
+            severity_colors = {
+                'INFO': '#4ECDC4',
+                'WARN': '#FFE66D',
+                'ERROR': '#FF6B6B'
+            }
+            severity_icons = {
+                'INFO': '🔵',
+                'WARN': '🟡',
+                'ERROR': '🔴'
+            }
             
-            # Mostrar tabela
-            st.subheader("📄 Logs Capturados")
-            df_display = pd.DataFrame([
-                {
-                    'ID': l['id'],
-                    'Team': l['teamTag'],
-                    'Timestamp': l['timestamp'][:19]
-                }
-                for l in parsed_logs
-            ])
-            st.dataframe(df_display, use_container_width=True)
+            color = severity_colors.get(severity, '#8b92a8')
+            icon = severity_icons.get(severity, 'ℹ️')
             
-            if show_raw_data:
-                with st.expander("🔍 Dados Brutos - Logs JSON"):
-                    for l in parsed_logs[:5]:
-                        st.json(l['payload'])
+            st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.05); 
+                        border-left: 4px solid {color}; 
+                        border-radius: 8px; 
+                        padding: 0.8rem; 
+                        margin: 0.5rem 0;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+                    <span>{icon}</span>
+                    <strong style="color: {color};">{severity}</strong>
+                    <span style="color: #8b92a8; margin-left: auto; font-size: 0.9rem;">
+                        {log.get('service_name', 'N/A')} | {log.get('timestamp', 'N/A')[:19]}
+                    </span>
+                </div>
+                <p style="margin: 0; color: white; font-family: monospace; font-size: 0.9rem;">
+                    {log.get('body', 'Sem mensagem')}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        if show_raw_data:
+            with st.expander("🔍 Dados Brutos - Logs"):
+                for l in filtered_logs[:10]:
+                    st.json(l)
 
 with tab4:
     st.markdown("### 🎯 Central de Alertas Cognitivos")

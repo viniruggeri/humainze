@@ -18,20 +18,14 @@ LINKS DE ENTREGA
 ================================================================================
 
 Repositório GitHub:
-https://github.com/viniruggeri/humainze-java
+https://github.com/viniruggeri/humainze-iot
 
-Deploy Azure (Switzerland North):
-- IP Público: 172.161.94.218
-- Backend API: http://172.161.94.218:8081
-- Swagger UI: http://172.161.94.218:8081/swagger-ui.html
-- Dashboard: http://172.161.94.218:8501
-- Health Check: http://172.161.94.218:8081/actuator/health
 
 GitHub Pages (Documentação):
 https://viniruggeri.github.io/humainze-java/
 
 Vídeo Demonstração (YouTube):
-[INSERIR LINK DO VÍDEO AQUI APÓS UPLOAD]
+https://youtu.be/-CnjlgKR80Y
 
 ================================================================================
 DESCRIÇÃO DA SOLUÇÃO
@@ -58,30 +52,6 @@ BENEFÍCIOS:
 - Redução de afastamentos por doenças respiratórias e fadiga
 - Compliance regulatório (NR-17 - Ergonomia)
 - Dados históricos para melhoria contínua
-
-================================================================================
-ESTRUTURA DO REPOSITÓRIO
-================================================================================
-
-humainze-java/
-├── IoT/
-│   ├── README.md                      # Documentação completa IoT
-│   ├── GUIA_TESTES.md                 # Guia de testes (1000+ linhas)
-│   ├── esp32_sensor_monitor.ino       # Código principal ESP32
-│   ├── diagram.json                   # Simulação Wokwi
-│   ├── platformio.ini                 # Configuração PlatformIO
-│   ├── wokwi.toml                     # Wokwi offline
-│   └── testes/
-│       ├── test_conectividade.ino     # Teste WiFi + NTP
-│       ├── test_sensores.ino          # Teste leitura sensores
-│       └── test_backend.ino           # Teste comunicação HTTP
-├── src/                               # Backend Java Spring Boot
-├── dashboard/                         # Dashboard Streamlit
-├── docs/                              # Documentação (GitHub Pages)
-│   ├── INTEGRATION_GUIDE_IOT.md       # Guia integração IoT
-│   ├── DASHBOARD_GUIDE.md             # Guia dashboard
-│   └── EXECUTIVE_SUMMARY.md           # Resumo executivo
-└── docker-compose.yml                 # Deploy completo
 
 ================================================================================
 INSTRUÇÕES PARA EXECUÇÃO
@@ -193,17 +163,3 @@ DevOps:
 - Maven 3.9
 - Git + GitHub
 - GitHub Pages (Jekyll)
-
-================================================================================
-OBSERVAÇÕES FINAIS
-================================================================================
-
-- Sistema testado e validado end-to-end
-- Todos os requisitos técnicos mínimos atendidos
-- Documentação pronta para consulta e replicação
-- Código-fonte aberto e licenciado (MIT)
-- Integração completa entre disciplinas (Java + Front-End)
-
-Data de entrega: 22/11/2025
-
-================================================================================
