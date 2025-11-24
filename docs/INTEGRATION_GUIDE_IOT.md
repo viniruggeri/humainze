@@ -670,5 +670,5 @@ curl http://localhost:8080/export/metrics?teamTag=IOT&page=0&size=10 \
 
 Contate: backend-team@humainze.ai
 
-Repositório: https://github.com/humanize/humainze-dash
+Repositório: https://github.com/viniruggeri/humainze
 
