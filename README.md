@@ -116,26 +116,31 @@ curl -X POST http://localhost:8080/otel/v1/metrics \
 http://localhost:8080/swagger-ui.html
 ```
 
+### 5️⃣ Acessar Dashboard
+
+```
+http://localhost:8501
+```
+
 ---
 
 **Humainze** é o backend central de uma plataforma cognitiva integrada que atua como centro nervoso conectando três ecossistemas distintos:
 
 1. **🔌 IoT** - Sensores físicos (Arduino/ESP32) enviando dados em tempo real
 2. **🤖 IA Python** - Modelos de ML para previsão, detecção de drift e automações inteligentes
-3. **📊 Dashboard Web** - Interface de monitoramento, alertas e gestão
+3. **📊 Dashboard Streamlit** - Interface de monitoramento e visualização em tempo real
 
 ### O que ele faz?
 
-O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de dados relacional, detecta anomalias, envia eventos para módulos de IA, recebe previsões, gerencia alertas automáticos e mantém tudo rastreável via **tracing distribuído**.
+O Humainze Backend recebe dados de sensores IoT via protocolo OTLP, valida, armazena em banco de dados relacional (Oracle/H2), e serve os dados via APIs REST para o dashboard Streamlit. Todo o sistema é rastreável com métricas, traces e logs estruturados.
 
 ### Por que Humainze?
 
 - ✅ **Centralização de dados** de múltiplas fontes (IoT + IA)
-- ✅ **RBAC robusto** baseado em equipes (não usuários individuais)
-- ✅ **Observabilidade open-source** - backend Java + dashboard Streamlit customizado
-- ✅ **Sistema de alertas cognitivos** em tempo real com auto-refresh
-- ✅ **Solução completa sem dependências externas** (SigNoz, Grafana, etc.)
-- ✅ **Arquitetura pronta para produção** com Spring Boot 3.5
+- ✅ **RBAC robusto** baseado em equipes com JWT
+- ✅ **Observabilidade completa** - backend Java + dashboard Streamlit customizado
+- ✅ **Solução 100% open-source** sem dependências externas
+- ✅ **Arquitetura pronta para produção** com Spring Boot 3.5 + Docker
 
 ---
 
@@ -174,11 +179,11 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
                          │   │   (JWT)  │   │         └──────────────┘
                          │   └────┬─────┘   │
                          │        │         │
-┌──────────────┐         │   ┌────▼─────┐   │         ┌──────────────┐
-│   Dashboard  │◀────────│   │Controller│   │────────▶│   SigNoz     │
-│     Web      │  HTTP   │   └────┬─────┘   │  OTLP  │ Observability│
-│   (React)    │         │        │         │         │   Platform   │
-└──────────────┘         │   ┌────▼─────┐   │         └──────────────┘
+┌──────────────┐         │   ┌────▼─────┐   │
+│  Dashboard   │◀────────│   │Controller│   │
+│  Streamlit   │  REST   │   └────┬─────┘   │
+│  (Python)    │  API    │        │         │
+└──────────────┘         │   ┌────▼─────┐   │
                          │   │ Service  │   │
                          │   └────┬─────┘   │
                          │        │         │
@@ -243,15 +248,15 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 - ✅ **Resolução de alertas** com tracking
 - ✅ **Histórico completo** com paginação
 
-### 📊 Observabilidade Open-Source
+### 📊 Observabilidade Completa
 
-- ✅ **Backend Java como servidor OTLP** - recebe métricas, traces e logs
-- ✅ **Persistência em banco relacional** (OracleDB/H2)
+- ✅ **Backend Java como coletor OTLP** - recebe métricas, traces e logs via HTTP
+- ✅ **Persistência em banco relacional** (OracleDB prod / H2 dev)
 - ✅ **APIs REST para consulta** com paginação, filtros e ordenação
-- ✅ **Dashboard Streamlit customizado** - visualizações em tempo real
-- ✅ **Gráficos interativos** com Plotly (time series, gauges, barras)
-- ✅ **Sistema de alertas integrado** - banner + histórico completo
-- ✅ **Health checks** via Spring Actuator
+- ✅ **Dashboard Streamlit (porta 8501)** - visualizações em tempo real
+- ✅ **Gráficos interativos Plotly** - time series, gauges, barras
+- ✅ **Sistema de alertas integrado** - visualização + histórico
+- ✅ **Health checks** via Spring Actuator (`/actuator/health`)
 - ✅ **Solução 100% open-source** sem dependências proprietárias
 
 ### 📖 Documentação
@@ -278,7 +283,7 @@ O Humainze Backend recebe dados de sensores IoT, valida, armazena em banco de da
 | **RF-BACK-07** | CRUD completo de equipes (Teams) | Média | ✅ |
 | **RF-BACK-08** | CRUD de roles e associação com equipes | Média | ✅ |
 | **RF-BACK-09** | Sistema de alertas com tipos DRIFT, MODEL_ERROR, SERVICE_DOWN | Alta | ✅ |
-| **RF-BACK-10** | Envio de emails automáticos para alertas críticos | Média | ✅ |
+| **RF-BACK-10** | Visualização de alertas no dashboard | Média | ✅ |
 | **RF-BACK-11** | Paginação, ordenação e filtros em consultas | Alta | ✅ |
 | **RF-BACK-12** | Bean Validation em todos os DTOs | Alta | ✅ |
 | **RF-BACK-13** | Tratamento global de exceções | Alta | ✅ |
@@ -425,7 +430,10 @@ mvnw.cmd clean install -DskipTests
 java -jar target/humainze-dash-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
-**Aplicação disponível em:** `http://localhost:8080`
+**Aplicação disponível em:** 
+- Backend: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger-ui.html`
+- Dashboard: `http://localhost:8501` (rodar separadamente)
 
 ---
 
@@ -457,22 +465,11 @@ SPRING_DATASOURCE_USERNAME=humainze
 SPRING_DATASOURCE_PASSWORD=senha-segura
 ```
 
-#### Email (SMTP)
+#### Dashboard
 
 ```bash
-SPRING_MAIL_HOST=smtp.gmail.com
-SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=seu-email@gmail.com
-SPRING_MAIL_PASSWORD=sua-senha-app
-SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
-SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
-```
-
-#### Observabilidade
-
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz:4318
-OTEL_SERVICE_NAME=humainze-backend
+DASHBOARD_URL=http://localhost:8501
+STREAMLIT_SERVER_PORT=8501
 ```
 
 ### Seed Data Automático
@@ -501,14 +498,9 @@ SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle-fiap:1521/xe
 SPRING_DATASOURCE_USERNAME=humainze_prod
 SPRING_DATASOURCE_PASSWORD=prod_password_2025
 
-# Email
-SPRING_MAIL_HOST=smtp.gmail.com
-SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=humainze.alerts@gmail.com
-SPRING_MAIL_PASSWORD=app-specific-password
-
-# OTEL
-OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz:4318
+# Dashboard
+DASHBOARD_URL=http://localhost:8501
+STREAMLIT_SERVER_PORT=8501
 ```
 
 ---
